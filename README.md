@@ -1,6 +1,6 @@
 # Projekt Labor - Családfa megjelenítés
   
-Ez a projekt a "Családfa megjelenítés" téma megvalósítása ElectronJS, SolidJS és TypeScript technológiák felhasználásával.  
+Ez a projekt a `Családfa megjelenítés` téma megvalósítása ElectronJS, SolidJS és TypeScript technológiák felhasználásával.  
   
 ## Csapat
 - Kukk Péter:  
