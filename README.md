@@ -1,1 +1,1 @@
-# Projekt-Labor
+# Projekt Labor
