@@ -1,7 +1,18 @@
-# Projekt Labor
-
-Ez a projekt egy ElectronJS alkalmazást és egy hozzá tartozó frontend frameworköt tartalmaz.
-
+# Projekt Labor - Családfa megjelenítés
+  
+Ez a projekt a "Családfa megjelenítés" téma megvalósítása ElectronJS, SolidJS és TypeScript technológiák felhasználásával.  
+  
+## Csapat
+- Kukk Péter:  
+   **Neptun kód:** *`T33SA0`*  
+   **Email cím:** *`peti.kukk@gmail.com`*
+- Regenye Tamás:  
+   **Neptun kód:** `IT1F4S`  
+   **Email cím:** *`tomiregenye@gmail.com`*
+- Szűcs Gergely:  
+   **Neptun kód:** `EZN3P5`  
+   **Email cím:** *`gergely.gsc@gmail.com`*  
+  
 ## Rendszerkövetelmények
 
 - Node.js verzió: 20.14.0 vagy újabb
