@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+      "target": "ES2015",
+      "module": "commonjs",
+      "strict": true,
+      "esModuleInterop": true,
+      "skipLibCheck": true,
+      "forceConsistentCasingInFileNames": true,
+      "outDir": "./main",
+      "rootDir": "./electron"
+    },
+    "include": [
+      "electron/**/*"
+    ],
+    "exclude": [
+      "node_modules"
+    ]
+}

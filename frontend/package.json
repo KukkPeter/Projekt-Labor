@@ -1,0 +1,24 @@
+{
+  "name": "projekt-labor-frontend",
+  "version": "1.0.0",
+  "description": "Projekt Labor - 2024 @ Kukk Péter | Regenye Tamás | Szűcs Gergely",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview"
+  },
+  "license": "GPL-3.0-only",
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11",
+    "vite-plugin-solid": "^2.8.2",
+    "vite-plugin-solid-svg": "^0.8.1"
+  },
+  "dependencies": {
+    "solid-js": "^1.8.11",
+    "rxjs": "^7.8.1",
+    "reflect-metadata": "^0.2.2",
+    "tsyringe": "^4.8.0"
+  }
+}
