@@ -1,13 +1,11 @@
 import type { JSX } from 'solid-js';
 
 import styles from './app.module.css';
+import Login from '../login/login';
+import Register from '../register/register';
 
 export default function(): JSX.Element {
   return (
-    <div class={styles.App}>
-      <header class={styles.header}>
-        <h1>Hello world!</h1>
-      </header>
-    </div>
+    <Register></Register>
   );
 };
