@@ -13,7 +13,7 @@ export default function(): JSX.Element {
   return <>
     <div id='home'>
         <h1>HELLO WORLD!</h1>
-        <button onClick={auth.logout}>LOGOUT</button>
+        <button onClick={logout}>LOGOUT</button>
     </div>
   </>;
 };
