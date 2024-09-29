@@ -1,14 +1,20 @@
-import { createSignal, JSX } from "solid-js";
+import { createSignal, JSX, useContext } from "solid-js";
+
 import style from './login.module.css';
 
-export default function(): JSX.Element {
+import { AuthService } from "../../services/auth.service";
+import { DIContextProvider } from "../../services/context-provider";
+
+export default function(props: { goToRegister: any }): JSX.Element {
+  const auth: AuthService = useContext(DIContextProvider)!.resolve(AuthService);
+
   const [username, setUsername] = createSignal("");
   const [password, setPassword] = createSignal("");
 
   const handleSubmit = (e:any) => {
     e.preventDefault();
-    // Itt kezelheti a bejelentkezési logikát
-    console.log("Bejelentkezési kísérlet:", username(), password());
+
+    auth.login(username(), password());
   };
 
   return (
@@ -47,6 +53,7 @@ export default function(): JSX.Element {
           </button>
         </form>
       </div>
+      <button class={style['redirect-button']} onClick={props.goToRegister}>Itt tudsz regisztrálni</button>
     </div>
   );
 };

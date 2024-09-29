@@ -4,6 +4,8 @@ import { render } from 'solid-js/web';
 import { container } from 'tsyringe';
 
 import { DIContextProvider } from './services/context-provider';
+import { AuthService } from './services/auth.service';
+
 import App from './components/app/app';
 
 import './index.css';
@@ -17,6 +19,8 @@ if (!(root instanceof HTMLElement)) {
 }
 
 const appContainer = container.createChildContainer();
+
+appContainer.registerSingleton(AuthService); // AuthService auth = new AuthService();
 
 render(() => <>
   <DIContextProvider.Provider value={appContainer}>

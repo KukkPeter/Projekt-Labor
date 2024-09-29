@@ -1,21 +1,24 @@
-import { createSignal, JSX } from "solid-js";
+import { createSignal, JSX, useContext } from "solid-js";
 import style from './register.module.css';
+import { AuthService } from "../../services/auth.service";
+import { DIContextProvider } from "../../services/context-provider";
 
-export default function(): JSX.Element {
+export default function(props: { goToLogin: any }): JSX.Element {
+  const auth: AuthService = useContext(DIContextProvider)!.resolve(AuthService);
+  
   const [username, setUsername] = createSignal("");
-  const [password, setPassword] = createSignal("");
   const [email, setEmail] = createSignal("");
+  const [password, setPassword] = createSignal("");
 
   const handleSubmit = (e:any) => {
     e.preventDefault();
-    // Itt kezelheti a bejelentkezési logikát
-    console.log("Bejelentkezési kísérlet:", username(), email(), password());
+    auth.register(username(), email(), password());
   };
 
   return (
-    <div class={style['login-container']}>
-      <div class={style['login-form']}>
-        <h2 class={style['login-title']}>Regisztrácó</h2>
+    <div class={style['register-container']}>
+      <div class={style['register-form']}>
+        <h2 class={style['register-title']}>Regisztrácó</h2>
         <form onSubmit={handleSubmit}>
           <div class={style['form-group']}>
             <label for="username" class={style['form-label']}>
@@ -61,6 +64,7 @@ export default function(): JSX.Element {
           </button>
         </form>
       </div>
+      <button class={style['redirect-button']} onClick={props.goToLogin}>Vissza a bejelentkezéshez</button>
     </div>
   );
 };
