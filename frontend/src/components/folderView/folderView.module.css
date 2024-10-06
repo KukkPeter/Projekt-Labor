@@ -60,4 +60,40 @@
     margin: 20px;
     height: 125px;
     box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.folder .bottomSection .scrollView .card h2 {
+    margin-left: 2rem;
+}
+
+.folder .bottomSection .scrollView .card .btnOpenTree {
+    margin-right: 2rem;
+    background: transparent;
+    border-radius: 8px;
+    padding: 5px;
+    border: 1px solid transparent;
+    transition: .3s ease-in-out;
+    cursor: pointer;
+}
+
+.folder .bottomSection .scrollView .card .btnOpenTree:hover {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid #adabad;
+}
+
+.folder .bottomSection .scrollView .card .btnOpenTree:active {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #adabad;
+}
+
+.folder .bottomSection .scrollView .card .btnOpenTree svg {
+    width: 32px;
+    height: 32px;
 }

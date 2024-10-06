@@ -43,7 +43,7 @@
     align-items: center;
 }
 
-.navbar .profileSection .profile img {
+.navbar .profileSection .profile svg {
     height: 64px;
     width: 64px;
     border-radius: 50%;
