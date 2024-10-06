@@ -1,0 +1,63 @@
+.folder {
+    width: 75%;
+    height: 100%;
+    
+    position: absolute;
+    right: 0;
+    top: 0;
+    
+    background: red;
+}
+
+.folder .topSection {
+    width: 100%;
+    height: 8%;
+    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+    
+    border-bottom: 2px solid black;
+    background: white;
+}
+
+.folder .topSection h3 {
+    margin: 0;
+    margin-left: 36px;
+}
+
+.folder .bottomSection {
+    width: 100%;
+    height: calc(92% - 2px);
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    
+    background: white;
+}
+
+.folder .bottomSection .scrollView {
+    overflow-y: auto;
+}
+
+.folder .bottomSection .scrollView::-webkit-scrollbar-thumb {
+	background-color: #adabad;
+    border-radius: 8px;
+}
+
+.folder .bottomSection .scrollView::-webkit-scrollbar {
+    width: 10px;
+}
+
+.folder .bottomSection .scrollView .card {
+    margin: 20px;
+    height: 125px;
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}

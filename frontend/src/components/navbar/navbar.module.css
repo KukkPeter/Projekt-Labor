@@ -1,0 +1,95 @@
+.navbar {
+    width: 25%;
+    height: 100%;
+    
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+
+    background: white;
+    border-right: 2px solid black;
+    z-index: 1;
+}
+
+/* Profil Menü + Név + Kijelentkezés gomb*/
+.navbar .profileSection {
+    width: 100%;
+    height: 20%;
+    
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-around;
+    align-items: center;
+
+    background: white;
+    border-bottom: 1px solid green;
+}
+
+.navbar .profileSection .profile {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.navbar .profileSection .profile img {
+    height: 64px;
+    width: 64px;
+    border-radius: 50%;
+    border: 1px solid #adabad;
+    padding: 3px;
+}
+
+.navbar .profileSection .profile p {
+    margin: 0;
+}
+
+.navbar .profileSection .btnLogout {
+    margin-top: 10px;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #3b82f6;
+    color: #3b82f6;
+    transition: .2s ease-in-out;
+    cursor: pointer;
+}
+  
+.navbar .profileSection .btnLogout:hover {
+    background-color: #3b82f6;
+    color: #fff !important;
+}
+  
+.navbar .profileSection .btnLogout:active {
+    background-color: #4177cf;
+    color: #fff !important;
+    border: 1px solid #4177cf;
+}
+
+/* Menü Szekció */
+.navbar .menuSection {
+    width: 100%;
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: stretch;
+}
+
+.navbar .menuSection button {
+    margin: 0;
+    padding: 10px;
+    border: 1px solid black;
+}
