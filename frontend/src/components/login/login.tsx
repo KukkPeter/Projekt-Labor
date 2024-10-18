@@ -20,7 +20,7 @@ export default function(props: { goToRegister: any }): JSX.Element {
   return (
     <div class={style['login-container']}>
       <div class={style['login-form']}>
-        <h2 class={style['login-title']}>Authenticate</h2>
+        <h2 class={style['login-title']}>authentication</h2>
         <form onSubmit={handleSubmit}>
           <div class={style['form-group']}>
             <label for="email" class={style['form-label']}>
