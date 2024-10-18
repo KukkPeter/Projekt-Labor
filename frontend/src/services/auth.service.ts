@@ -1,11 +1,18 @@
 import { BehaviorSubject, Observable } from "rxjs";
 import { singleton } from "tsyringe";
 
+import { toast } from "solid-toast";
+import { useContext } from "solid-js";
+import { DIContextProvider } from "./context-provider";
+import { ApplicationService } from "./application.service";
+
 import { User } from "../interfaces/user.interface";
-import {toast} from "solid-toast";
+import { Pages } from "../interfaces/pages.interface";
 
 @singleton()
 export class AuthService {
+    private app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
+
     private authenticated: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     public authenticated$: Observable<boolean> = this.authenticated.asObservable();
 
@@ -37,6 +44,9 @@ export class AuthService {
                     // @ts-ignore
                     window.authentication.getMyself(this.bearerToken);
 
+                    // Redirect to 'Home' page
+                    this.app.setCurrentPage(Pages.Home);
+
                     toast.success(response.message, {
                         id: this.toastId
                     });
@@ -62,6 +72,9 @@ export class AuthService {
                     this.authenticated.next(false);
                     this.bearerToken = undefined;
                     this.user.next({} as User);
+
+                    // Redirect to 'Authentication' page
+                    this.app.setCurrentPage(Pages.Home);
 
                     toast.success(response.message, {
                         id: this.toastId

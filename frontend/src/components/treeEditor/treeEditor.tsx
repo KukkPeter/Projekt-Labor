@@ -358,9 +358,10 @@ export default function TreeEditor(): JSX.Element {
           </button>
         </div>
       </div>
+
       <div class={style.centerPanel}>
-      <h3>Családfa Szerkesztő</h3>
-      <CanvasFamilyTreeEditor />
+        <h3>Családfa Szerkesztő</h3>
+        <CanvasFamilyTreeEditor />
       </div>
       
       <div class={style.rightPanel}>

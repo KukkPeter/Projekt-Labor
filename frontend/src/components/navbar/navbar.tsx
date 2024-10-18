@@ -1,18 +1,36 @@
-import {Accessor, from, JSX, useContext} from "solid-js";
+import {Accessor, from, JSX, Show, useContext} from "solid-js";
 
-import { AuthService } from '../../services/auth.service';
-import { DIContextProvider } from '../../services/context-provider';
+import {AuthService} from '../../services/auth.service';
+import {DIContextProvider} from '../../services/context-provider';
 
 import style from './navbar.module.css';
-import {User} from "../../interfaces/user.interface";
 
-export default function(): JSX.Element {
+import {User} from "../../interfaces/user.interface";
+import {Pages} from "../../interfaces/pages.interface";
+import {ApplicationService} from "../../services/application.service";
+import PersonInfo from "../personInfo/personInfo";
+
+export default function(props: {
+    page: Pages.Home | Pages.Editor,
+    selectedPerson?: any
+}): JSX.Element {
+  const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
   const auth: AuthService = useContext(DIContextProvider)!.resolve(AuthService);
 
   const user: Accessor<User | undefined> = from(auth.user$);
 
   const logout = (): void => {
-      auth.logout();
+    auth.logout();
+  }
+
+  const createNewTree = (): void => {
+    console.debug('TODO: createNewTree');
+  }
+
+  const backToTheMainMenu = (): void => {
+    if(confirm('Are you sure you want to go back to the main menu?\nUnsaved content will be lost!')) {
+        app.setCurrentPage(Pages.Home);
+    }
   }
 
   return <>
@@ -25,13 +43,27 @@ export default function(): JSX.Element {
             <p>{user()?.username}</p>
         </div>
         <button class={style.btnLogout} onClick={logout}>
-            Kijelentkezés
+            Logout
         </button>
       </div>
 
       <div class={style.menuSection}>
-        <button>Új fa létrehozása</button>
+        <Show when={props.page === Pages.Home}>
+            <button onClick={createNewTree}>Create new family tree</button>
+        </Show>
+        <Show when={props.page === Pages.Editor}>
+          <button onClick={backToTheMainMenu}>Back to the main menu</button>
+          <hr />
+          <div class={style.editorTab}>
+            <button>Create a new person</button>
+            <hr />
+
+            <PersonInfo />
+
+          </div>
+        </Show>
       </div>
     </div>
-  </>;
+  </>
+;
 };
