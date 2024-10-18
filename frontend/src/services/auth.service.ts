@@ -2,6 +2,7 @@ import { BehaviorSubject, Observable } from "rxjs";
 import { singleton } from "tsyringe";
 
 import { User } from "../interfaces/user.interface";
+import {toast} from "solid-toast";
 
 @singleton()
 export class AuthService {
@@ -13,6 +14,8 @@ export class AuthService {
     get User(): User { return this.user.getValue(); }
 
     private bearerToken?: string;
+
+    private toastId?: string;
 
     constructor() {
         // @ts-ignore
@@ -33,11 +36,25 @@ export class AuthService {
 
                     // @ts-ignore
                     window.authentication.getMyself(this.bearerToken);
+
+                    toast.success(response.message, {
+                        id: this.toastId
+                    });
+                } else {
+                    toast.error(response.data, {
+                        id: this.toastId
+                    });
                 }
                 break;
             case 'register':
                 if(response.status === 200) {
-                    // TODO: Redirect to login page
+                    toast.success(response.message, {
+                        id: this.toastId
+                    });
+                } else {
+                    toast.error(response.data, {
+                        id: this.toastId
+                    });
                 }
                 break;
             case 'logout':
@@ -45,6 +62,14 @@ export class AuthService {
                     this.authenticated.next(false);
                     this.bearerToken = undefined;
                     this.user.next({} as User);
+
+                    toast.success(response.message, {
+                        id: this.toastId
+                    });
+                } else {
+                    toast.error(response.data, {
+                        id: this.toastId
+                    });
                 }
                 break;
             case 'myself':
@@ -59,17 +84,29 @@ export class AuthService {
     }
 
     public login(username: string, password: string): void {
-        // @ts-ignore
-        window.authentication.login(username, password);
+        this.toastId = toast.loading('Logging in...');
+
+        setTimeout((): void => {
+            // @ts-ignore
+            window.authentication.login(username, password);
+        }, 250);
     }
 
     public register(username: string, email: string, password: string, passwordAgain: string): void {
-        // @ts-ignore
-        window.authentication.register(email, username, password, passwordAgain);
+        this.toastId = toast.loading('Registering...');
+
+        setTimeout((): void => {
+            // @ts-ignore
+            window.authentication.register(email, username, password, passwordAgain);
+        }, 250);
     }
 
     public logout(): void {
-        // @ts-ignore
-        window.authentication.logout(this.bearerToken);
+        this.toastId = toast.loading('Logging out...');
+
+        setTimeout((): void => {
+            // @ts-ignore
+            window.authentication.logout(this.bearerToken);
+        }, 250);
     }
 }
