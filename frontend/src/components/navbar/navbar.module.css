@@ -14,7 +14,7 @@
     align-items: center;
 
     background: white;
-    border-right: 2px solid black;
+    box-shadow: #0000003d 0 3px 8px;
     z-index: 1;
 }
 
@@ -89,7 +89,22 @@
 }
 
 .navbar .menuSection button {
-    margin: 0;
-    padding: 10px;
-    border: 1px solid black;
+    padding: 12px;
+    margin: 12px;
+    box-shadow: #0000003d 0 3px 8px;
+    background:rgba(0,0,0,0.05);
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: .2s ease-in-out;
+}
+
+.navbar .menuSection button:hover {
+    background: rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,.45);
+}
+
+.navbar .menuSection button:active {
+    background: rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,.65);
 }

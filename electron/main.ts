@@ -1,5 +1,6 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
+import {Router} from "./router";
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -7,6 +8,7 @@ function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    title: 'Family Tree',
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -19,10 +21,14 @@ function createWindow() {
   win.webContents.openDevTools();
 
   win.loadFile('../frontend/dist/index.html');
+
+  return win;
 }
 
 app.whenReady().then(() => {
-  createWindow();
+  let browserWindow = createWindow();
+
+  new Router(browserWindow);
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {

@@ -1,4 +1,4 @@
-import { Accessor, from, Show, useContext, type JSX } from 'solid-js';
+import {Accessor, from, Show, useContext, type JSX } from 'solid-js';
 
 import Auth from '../../pages/auth/auth';
 
