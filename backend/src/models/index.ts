@@ -1,7 +1,7 @@
 import { Sequelize } from 'sequelize';
 
 const sequelize = new Sequelize(
-    "ProjektLabor",             // Adatbázis neve
+    "projekt_labor",             // Adatbázis neve
     "root",                     // Felhasználó név
     "",                         // Jelszó az adatbázishoz
     {
