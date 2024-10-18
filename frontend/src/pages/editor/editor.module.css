@@ -1,0 +1,23 @@
+.editor {
+    background: gray;
+}
+
+.editor .titleBox {
+    width: 50%;
+    height: 5%;
+    left: 25%;
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    z-index: 16;
+    box-shadow: 0 10px 10px -8px grey;
+}
+
+.editor .titleBox h1 {
+    margin: 0;
+}

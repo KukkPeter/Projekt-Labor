@@ -15,6 +15,7 @@
 
     background: white;
     z-index: 1;
+    box-shadow: 0 0 10px #00000073;
 }
 
 /* Profil Menü + Név + Kijelentkezés gomb*/
@@ -30,7 +31,7 @@
     align-items: center;
 
     background: white;
-    box-shadow: #00000073 0 -10px 20px 0;
+    box-shadow: 0 0 10px -2px #00000073;
     z-index: 1;
 }
 
@@ -44,8 +45,8 @@
 }
 
 .navbar .profileSection .profile svg {
-    height: 64px;
-    width: 64px;
+    height: 32px;
+    width: 32px;
     border-radius: 50%;
     border: 1px solid #adabad;
     padding: 3px;
@@ -87,7 +88,6 @@
     align-content: center;
     justify-content: flex-start;
     align-items: stretch;
-    box-shadow: #00000073 0 -10px 20px 0;
 }
 
 .navbar .menuSection hr {
@@ -114,6 +114,26 @@
     background: rgba(0,0,0,0.12);
     border: 1px solid rgba(0,0,0,.65);
 }
+
+.navbar .menuSection button.backToMainMenu {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.navbar .menuSection button.backToMainMenu svg {
+    height: 16px;
+    width: 16px;
+    transform: rotate(180deg);
+}
+
+.navbar .menuSection button.backToMainMenu p {
+    margin: 10px;
+}
+
 
 .navbar .menuSection .editorTab {
     height: 100%;

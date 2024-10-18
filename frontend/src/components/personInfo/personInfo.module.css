@@ -9,6 +9,17 @@
     align-items: stretch;
     background: rgba(0,0,0,0.03);
     box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.personInfo::-webkit-scrollbar-thumb {
+    background-color: #adabad;
+    border-radius: 8px;
+}
+
+.personInfo::-webkit-scrollbar {
+    width: 10px;
 }
 
 .personInfo h3 {
@@ -30,6 +41,20 @@
 
 .personInfo .menu button.unselected {
     box-shadow: none;
+}
+
+.personInfo .content {
+    overflow-y: auto;
+    margin-top: 5px;
+}
+
+.personInfo .content::-webkit-scrollbar-thumb {
+    background-color: #adabad;
+    border-radius: 8px;
+}
+
+.personInfo .content::-webkit-scrollbar {
+    width: 10px;
 }
 
 .personInfo .content p {
