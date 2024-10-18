@@ -36,6 +36,8 @@ const CanvasFamilyTreeEditor = () => {
       const drawNode = (person: string, x: number, y: number) => {
         ctx.fillStyle = person === rootPerson() ? '#a0e1ff' : '#f0f0f0';
         ctx.fillRect(x, y, nodeWidth, nodeHeight);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
         ctx.strokeRect(x, y, nodeWidth, nodeHeight);
         ctx.fillStyle = 'black';
         ctx.fillText(person, x + 5, y + 25);
@@ -47,6 +49,7 @@ const CanvasFamilyTreeEditor = () => {
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
         ctx.stroke();
       };
 
@@ -72,24 +75,35 @@ const CanvasFamilyTreeEditor = () => {
         const children = getChildrenOf(person);
         const spouse = getSpouseOf(person);
 
-        // Draw parents
-        const parentStartX = centerX - ((parents.length) * (nodeWidth + horizontalSpacing) / 2);
         parents.forEach((parent, index) => {
-          const x = parentStartX + (index * (nodeWidth + horizontalSpacing));
+          const x = index === 0 ? centerX - nodeWidth - horizontalSpacing : centerX + nodeWidth + horizontalSpacing;
           const y = centerY - verticalSpacing;
           const parentInfo = drawNode(parent, x, y);
           drawnNodes.push({ person: parent, ...parentInfo });
-          drawLine(x + nodeWidth / 2, y + nodeHeight, centerX + nodeWidth / 2, centerY, 'green');
+          if (index === 0) {
+            // First parent: connect as before
+            drawLine(x + nodeWidth / 2, y + nodeHeight, centerX + nodeWidth / 2, centerY, 'green');
+          } else {
+            // Second parent: connect diagonally to the right
+            drawLine(x + nodeWidth / 2, y + nodeHeight, centerX + nodeWidth / 2, centerY, 'green');
+          }
         });
 
         // Draw siblings
-        const siblingStartX = centerX - ((siblings.length) * (nodeWidth + horizontalSpacing) / 2);
+        const siblingStartX = centerX - nodeWidth - horizontalSpacing;
         siblings.forEach((sibling, index) => {
-          const x = siblingStartX + (index * (nodeWidth + horizontalSpacing));
+          const x = siblingStartX - (index * (nodeWidth + horizontalSpacing));
           const y = centerY;
           const siblingInfo = drawNode(sibling, x, y);
           drawnNodes.push({ person: sibling, ...siblingInfo });
-          drawLine(x + nodeWidth, y + nodeHeight / 2, centerX, centerY + nodeHeight / 2, 'blue');
+          if (index > 0) {
+            // Connect siblings to each other
+            const prevSiblingX = siblingStartX - ((index - 1) * (nodeWidth + horizontalSpacing));
+            drawLine(x + nodeWidth, y + nodeHeight / 2, prevSiblingX, y + nodeHeight / 2, 'blue');
+          } else {
+            // Connect first sibling to root
+            drawLine(x + nodeWidth, y + nodeHeight / 2, centerX, centerY + nodeHeight / 2, 'blue');
+          }
         });
 
         // Draw spouse
@@ -189,7 +203,7 @@ const CanvasFamilyTreeEditor = () => {
     return () => {
       canvas.removeEventListener('click', handleCanvasClick);
     };
-  });
+  }); 
 
   const addPerson = () => {
     if (newPerson() && !people().includes(newPerson())) {
