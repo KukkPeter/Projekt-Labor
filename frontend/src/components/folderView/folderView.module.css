@@ -5,8 +5,6 @@
     position: absolute;
     right: 0;
     top: 0;
-    
-    background: red;
 }
 
 .folder .topSection {
@@ -20,13 +18,11 @@
     justify-content: flex-start;
     align-items: center;
     
-    border-bottom: 2px solid black;
-    background: white;
+    box-shadow: rgba(0, 0, 0, 0.45) 0px 20px 20px -25px;
 }
 
 .folder .topSection h3 {
-    margin: 0;
-    margin-left: 36px;
+    margin: 0 0 0 36px;
 }
 
 .folder .bottomSection {
@@ -39,8 +35,6 @@
     align-content: center;
     justify-content: flex-start;
     align-items: stretch;
-    
-    background: white;
 }
 
 .folder .bottomSection .scrollView {

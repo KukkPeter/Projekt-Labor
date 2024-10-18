@@ -1,0 +1,33 @@
+{
+  "controllerPathGlobs": [
+    "./src/controllers/**/*.ts"
+  ],
+
+  "entryFile": "./src/server.ts",
+  "spec": {
+    "outputDirectory": ".",
+    "entryFile": "./src/server.ts",
+    "host": "localhost:8000",
+    "basePath": "/",
+    "schemes": [ "http" ],
+    "description": "Projekt Labor",
+    "version": "1.0.0",
+    "contact": {
+      "name":"Regenye Tamás | Kukk Péter | Szűcs Gergely ",
+      "url":"https://github.com/KukkPeter/Projekt-Labor"
+    },
+    "specVersion":3,
+    "securityDefinitions": {
+      "jwt": {
+        "type":"http",
+        "scheme": "bearer",
+        "bearerFormat":"JWT"
+      }
+    }
+  },
+  "routes": {
+    "basePath": "/",
+    "routesDir": "./src/",
+    "authenticationModule":"./src/middlewares/authentication.ts"
+  }
+}

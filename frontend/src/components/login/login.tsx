@@ -8,36 +8,36 @@ import { DIContextProvider } from "../../services/context-provider";
 export default function(props: { goToRegister: any }): JSX.Element {
   const auth: AuthService = useContext(DIContextProvider)!.resolve(AuthService);
 
-  const [username, setUsername] = createSignal("");
+  const [email, setEmail] = createSignal("");
   const [password, setPassword] = createSignal("");
 
   const handleSubmit = (e:any) => {
     e.preventDefault();
 
-    auth.login(username(), password());
+    auth.login(email(), password());
   };
 
   return (
     <div class={style['login-container']}>
       <div class={style['login-form']}>
-        <h2 class={style['login-title']}>Bejelentkezés</h2>
+        <h2 class={style['login-title']}>Authentication</h2>
         <form onSubmit={handleSubmit}>
           <div class={style['form-group']}>
-            <label for="username" class={style['form-label']}>
-              Felhasználónév
+            <label for="email" class={style['form-label']}>
+              Email Address
             </label>
             <input
-              type="text"
-              id="username"
-              value={username()}
-              onInput={(e) => setUsername(e.target.value)}
+              type="email"
+              id="email"
+              value={email()}
+              onInput={(e) => setEmail(e.target.value)}
               class={style['form-input']}
               required
             />
           </div>
           <div class={style['form-group']}>
             <label for="password" class={style['form-label']}>
-              Jelszó
+              Password
             </label>
             <input
               type="password"
@@ -49,11 +49,11 @@ export default function(props: { goToRegister: any }): JSX.Element {
             />
           </div>
           <button type="submit" class={style['submit-button']}>
-            Bejelentkezés
+            Login
           </button>
         </form>
       </div>
-      <button class={style['redirect-button']} onClick={props.goToRegister}>Itt tudsz regisztrálni</button>
+      <button class={style['redirect-button']} onClick={props.goToRegister}>Go to register</button>
     </div>
   );
 };
