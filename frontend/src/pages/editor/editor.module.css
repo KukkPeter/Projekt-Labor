@@ -16,6 +16,7 @@
     align-items: center;
     z-index: 16;
     box-shadow: 0 10px 10px -8px grey;
+    background: white;
 }
 
 .editor .titleBox h1 {
