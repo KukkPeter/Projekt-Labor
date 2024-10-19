@@ -1,0 +1,11 @@
+.mainBox {
+    position: absolute;
+    width: 50%;
+    height: 93%;
+
+    top: 7%;
+    left: 25%;
+    right: 25%;
+
+    overflow: hidden;
+}

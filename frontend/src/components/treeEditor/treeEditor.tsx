@@ -36,6 +36,8 @@ const CanvasFamilyTreeEditor = () => {
       const drawNode = (person: string, x: number, y: number) => {
         ctx.fillStyle = person === rootPerson() ? '#a0e1ff' : '#f0f0f0';
         ctx.fillRect(x, y, nodeWidth, nodeHeight);
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 1;
         ctx.strokeRect(x, y, nodeWidth, nodeHeight);
         ctx.fillStyle = 'black';
         ctx.fillText(person, x + 5, y + 25);
@@ -47,13 +49,14 @@ const CanvasFamilyTreeEditor = () => {
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
         ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
         ctx.stroke();
       };
 
       const getRelativesOf = (person: any, relationType: string) => {
         return relationships()
-          .filter((r:any) => r.type === relationType && (r.person1 === person || r.person2 === person))
-          .map((r:any) => r.person1 === person ? r.person2 : r.person1);
+            .filter((r:any) => r.type === relationType && (r.person1 === person || r.person2 === person))
+            .map((r:any) => r.person1 === person ? r.person2 : r.person1);
       };
 
       const getParentsOf = (person: any) => getRelativesOf(person, 'parent');
@@ -72,24 +75,35 @@ const CanvasFamilyTreeEditor = () => {
         const children = getChildrenOf(person);
         const spouse = getSpouseOf(person);
 
-        // Draw parents
-        const parentStartX = centerX - ((parents.length) * (nodeWidth + horizontalSpacing) / 2);
         parents.forEach((parent, index) => {
-          const x = parentStartX + (index * (nodeWidth + horizontalSpacing));
+          const x = index === 0 ? centerX - nodeWidth - horizontalSpacing : centerX + nodeWidth + horizontalSpacing;
           const y = centerY - verticalSpacing;
           const parentInfo = drawNode(parent, x, y);
           drawnNodes.push({ person: parent, ...parentInfo });
-          drawLine(x + nodeWidth / 2, y + nodeHeight, centerX + nodeWidth / 2, centerY, 'green');
+          if (index === 0) {
+            // First parent: connect as before
+            drawLine(x + nodeWidth / 2, y + nodeHeight, centerX + nodeWidth / 2, centerY, 'green');
+          } else {
+            // Second parent: connect diagonally to the right
+            drawLine(x + nodeWidth / 2, y + nodeHeight, centerX + nodeWidth / 2, centerY, 'green');
+          }
         });
 
         // Draw siblings
-        const siblingStartX = centerX - ((siblings.length) * (nodeWidth + horizontalSpacing) / 2);
+        const siblingStartX = centerX - nodeWidth - horizontalSpacing;
         siblings.forEach((sibling, index) => {
-          const x = siblingStartX + (index * (nodeWidth + horizontalSpacing));
+          const x = siblingStartX - (index * (nodeWidth + horizontalSpacing));
           const y = centerY;
           const siblingInfo = drawNode(sibling, x, y);
           drawnNodes.push({ person: sibling, ...siblingInfo });
-          drawLine(x + nodeWidth, y + nodeHeight / 2, centerX, centerY + nodeHeight / 2, 'blue');
+          if (index > 0) {
+            // Connect siblings to each other
+            const prevSiblingX = siblingStartX - ((index - 1) * (nodeWidth + horizontalSpacing));
+            drawLine(x + nodeWidth, y + nodeHeight / 2, prevSiblingX, y + nodeHeight / 2, 'blue');
+          } else {
+            // Connect first sibling to root
+            drawLine(x + nodeWidth, y + nodeHeight / 2, centerX, centerY + nodeHeight / 2, 'blue');
+          }
         });
 
         // Draw spouse
@@ -131,9 +145,9 @@ const CanvasFamilyTreeEditor = () => {
       const x = event.clientX - rect.left;
       const y = event.clientY - rect.top;
 
-      const clickedNode = drawnNodes.find(node => 
-        x >= node.x && x <= node.x + node.width && 
-        y >= node.y && y <= node.y + node.height
+      const clickedNode = drawnNodes.find(node =>
+          x >= node.x && x <= node.x + node.width &&
+          y >= node.y && y <= node.y + node.height
       );
 
       if (clickedNode && clickedNode.person !== rootPerson()) {
@@ -141,19 +155,19 @@ const CanvasFamilyTreeEditor = () => {
         const newRoot = clickedNode.person;
 
         // Check if the clicked node is a parent of the current root
-        const isParentOfRoot = relationships().some(r => 
-          r.type === 'parent' && r.person1 === oldRoot && r.person2 === newRoot
+        const isParentOfRoot = relationships().some(r =>
+            r.type === 'parent' && r.person1 === oldRoot && r.person2 === newRoot
         );
 
         // Check if the clicked node is a child of the current root
-        const isChildOfRoot = relationships().some(r => 
-          r.type === 'child' && r.person1 === oldRoot && r.person2 === newRoot
+        const isChildOfRoot = relationships().some(r =>
+            r.type === 'child' && r.person1 === oldRoot && r.person2 === newRoot
         );
 
         if (isParentOfRoot) {
           // Remove the old parent-child relationship
-          setRelationships(prev => prev.filter(r => 
-            !(r.type === 'parent' && r.person1 === oldRoot && r.person2 === newRoot)
+          setRelationships(prev => prev.filter(r =>
+              !(r.type === 'parent' && r.person1 === oldRoot && r.person2 === newRoot)
           ));
 
           // Add a new child relationship from new root to old root
@@ -166,8 +180,8 @@ const CanvasFamilyTreeEditor = () => {
           setPreviousRoots(prev => [...prev, oldRoot]);
         } else if (isChildOfRoot && previousRoots().includes(newRoot)) {
           // If we're going back to a previous root, restore the original relationship
-          setRelationships(prev => prev.filter(r => 
-            !(r.type === 'child' && r.person1 === oldRoot && r.person2 === newRoot)
+          setRelationships(prev => prev.filter(r =>
+              !(r.type === 'child' && r.person1 === oldRoot && r.person2 === newRoot)
           ));
 
           // Add back the original parent-child relationship
@@ -209,44 +223,44 @@ const CanvasFamilyTreeEditor = () => {
   };
 
   return (
-    <div class={style.familyTreeEditor}>
-      <div class={style.controls}>
-        <input
-          type="text"
-          value={newPerson()}
-          onInput={(e) => setNewPerson(e.target.value)}
-          placeholder="Új személy neve"
-        />
-        <button onClick={addPerson}>Személy hozzáadása</button>
+      <div class={style.familyTreeEditor}>
+        <div class={style.controls}>
+          <input
+              type="text"
+              value={newPerson()}
+              onInput={(e) => setNewPerson(e.target.value)}
+              placeholder="Új személy neve"
+          />
+          <button onClick={addPerson}>Személy hozzáadása</button>
 
-        <select
-          value={newRelationship().person1}
-          onChange={(e) => setNewRelationship({...newRelationship(), person1: e.target.value})}
-        >
-          <option value="">Válassz személyt</option>
-          {people().map(person => <option value={person}>{person}</option>)}
-        </select>
-        <select
-          value={newRelationship().type}
-          onChange={(e) => setNewRelationship({...newRelationship(), type: e.target.value})}
-        >
-          <option value="">Kapcsolat típusa</option>
-          <option value="parent">Szülő</option>
-          <option value="sibling">Testvér</option>
-          <option value="child">Gyermek</option>
-          <option value="spouse">Házastárs</option>
-        </select>
-        <select
-          value={newRelationship().person2}
-          onChange={(e) => setNewRelationship({...newRelationship(), person2: e.target.value})}
-        >
-          <option value="">Válassz személyt</option>
-          {people().map(person => <option value={person}>{person}</option>)}
-        </select>
-        <button onClick={addRelationship}>Kapcsolat hozzáadása</button>
+          <select
+              value={newRelationship().person1}
+              onChange={(e) => setNewRelationship({...newRelationship(), person1: e.target.value})}
+          >
+            <option value="">Válassz személyt</option>
+            {people().map(person => <option value={person}>{person}</option>)}
+          </select>
+          <select
+              value={newRelationship().type}
+              onChange={(e) => setNewRelationship({...newRelationship(), type: e.target.value})}
+          >
+            <option value="">Kapcsolat típusa</option>
+            <option value="parent">Szülő</option>
+            <option value="sibling">Testvér</option>
+            <option value="child">Gyermek</option>
+            <option value="spouse">Házastárs</option>
+          </select>
+          <select
+              value={newRelationship().person2}
+              onChange={(e) => setNewRelationship({...newRelationship(), person2: e.target.value})}
+          >
+            <option value="">Válassz személyt</option>
+            {people().map(person => <option value={person}>{person}</option>)}
+          </select>
+          <button onClick={addRelationship}>Kapcsolat hozzáadása</button>
+        </div>
+        <canvas ref={canvasRef} class={style.familyTreeCanvas}></canvas>
       </div>
-      <canvas ref={canvasRef} class={style.familyTreeCanvas}></canvas>
-    </div>
   );
 };
 
@@ -280,114 +294,113 @@ export default function TreeEditor(): JSX.Element {
   };
 
   return (
-    <div class={style.treeEditor}>
-      <div class={style.leftPanel}>
-        <h3>Profile Panel</h3>
-        <div class={style.profileSection}>
-          <div class={style.profile}>
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-              <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
-            </svg>
-            <p>Kukk Regenye Szűcs</p>
-          </div>
-          <button class={style.btnLogout}>
-            Kijelentkezés
-          </button>
-        </div>
-        
-        <button onClick={togglePersonalInfo} class={style.toggleButton}>
-          {showPersonalInfo() ? 'Hide Personal Info' : 'Show Personal Info'}
-        </button>
-        
-        {showPersonalInfo() && (
-          <div class={style.selectedPerson}>
-            <h2>selected person (Teszt Aladár)</h2>
-            <div class={style.tabs}>
-              <button 
-                class={activeTab() === 'personal' ? style.activeTab : ''}
-                onClick={() => switchTab('personal')}
-              >
-                Personal
-              </button>
-              <button 
-                class={activeTab() === 'biography' ? style.activeTab : ''}
-                onClick={() => switchTab('biography')}
-              >
-                Biography
-              </button>
-              <button 
-                class={activeTab() === 'upload' ? style.activeTab : ''}
-                onClick={() => switchTab('upload')}
-              >
-                Upload
-              </button>
+      <div class={style.treeEditor}>
+        <div class={style.leftPanel}>
+          <h3>Profile Panel</h3>
+          <div class={style.profileSection}>
+            <div class={style.profile}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
+              </svg>
+              <p>Kukk Regenye Szűcs</p>
             </div>
-            
-            {activeTab() === 'personal' && (
-              <div class={style.personalInfo}>
-                <p><strong>Full name:</strong> Teszt Aladár</p>
-                <p><strong>Gender:</strong> male</p>
-                <p><strong>Birth place:</strong> Veszprém</p>
-                <p><strong>Birth date:</strong> 2006. 09. 15.</p>
-              </div>
-            )}
-
-            {activeTab() === 'biography' && (
-              <div class={style.biographyInfo}>
-                <p>Teszt Aladár rövid életrajza itt lesz olvasható. Ez egy példa szöveg az életrajz bemutatására.</p>
-              </div>
-            )}
-
-            {activeTab() === 'upload' && (
-              <div class={style.uploadInfo}>
-                <p>Itt lesz lehetőség feltölteni a személyhez kapcsolódó dokumentumokat vagy képeket.</p>
-              </div>
-            )}
-            
-            <button class={style.addRelativesButton}>Click to add his relatives</button>
+            <button class={style.btnLogout}>
+              Kijelentkezés
+            </button>
           </div>
-        )}
-        
-        <button class={style.createPersonButton}>Create new person</button>
-        <button class={style.addExistingButton}>Add existing person</button>
+
+          <button onClick={togglePersonalInfo} class={style.toggleButton}>
+            {showPersonalInfo() ? 'Hide Personal Info' : 'Show Personal Info'}
+          </button>
+
+          {showPersonalInfo() && (
+              <div class={style.selectedPerson}>
+                <h2>selected person (Teszt Aladár)</h2>
+                <div class={style.tabs}>
+                  <button
+                      class={activeTab() === 'personal' ? style.activeTab : ''}
+                      onClick={() => switchTab('personal')}
+                  >
+                    Personal
+                  </button>
+                  <button
+                      class={activeTab() === 'biography' ? style.activeTab : ''}
+                      onClick={() => switchTab('biography')}
+                  >
+                    Biography
+                  </button>
+                  <button
+                      class={activeTab() === 'upload' ? style.activeTab : ''}
+                      onClick={() => switchTab('upload')}
+                  >
+                    Upload
+                  </button>
+                </div>
+
+                {activeTab() === 'personal' && (
+                    <div class={style.personalInfo}>
+                      <p><strong>Full name:</strong> Teszt Aladár</p>
+                      <p><strong>Gender:</strong> male</p>
+                      <p><strong>Birth place:</strong> Veszprém</p>
+                      <p><strong>Birth date:</strong> 2006. 09. 15.</p>
+                    </div>
+                )}
+
+                {activeTab() === 'biography' && (
+                    <div class={style.biographyInfo}>
+                      <p>Teszt Aladár rövid életrajza itt lesz olvasható. Ez egy példa szöveg az életrajz bemutatására.</p>
+                    </div>
+                )}
+
+                {activeTab() === 'upload' && (
+                    <div class={style.uploadInfo}>
+                      <p>Itt lesz lehetőség feltölteni a személyhez kapcsolódó dokumentumokat vagy képeket.</p>
+                    </div>
+                )}
+
+                <button class={style.addRelativesButton}>Click to add his relatives</button>
+              </div>
+          )}
+
+          <button class={style.createPersonButton}>Create new person</button>
+          <button class={style.addExistingButton}>Add existing person</button>
 
 
-        <div class={style.bottomButtons}>
-          <button class={style.deleteButton}>
-            <span class={style.icon}>🗑️</span> Delete this tree
+          <div class={style.bottomButtons}>
+            <button class={style.deleteButton}>
+              <span class={style.icon}>🗑️</span> Delete this tree
+            </button>
+          </div>
+        </div>
+        <div class={style.centerPanel}>
+          <h3>Családfa Szerkesztő</h3>
+          <CanvasFamilyTreeEditor />
+        </div>
+
+        <div class={style.rightPanel}>
+          <h3>Customize display</h3>
+          <div class={style.customizeTabs}>
+            <button class={style.activeTab}>Personal</button>
+            <button>Biography</button>
+            <button>Colors</button>
+            <button>Lines</button>
+          </div>
+          <div class={style.optionsList}>
+            {(Object.keys(displayOptions()) as DisplayOption[]).map((key) => (
+                <label class={style.optionItem}>
+                  <input
+                      type="checkbox"
+                      checked={displayOptions()[key]}
+                      onChange={() => toggleOption(key)}
+                  />
+                  {key.charAt(0).toUpperCase() + key.slice(1)}
+                </label>
+            ))}
+          </div>
+          <button class={style.clearButton}>
+            <span class={style.icon}>🗑️</span> Clear
           </button>
         </div>
       </div>
-
-      <div class={style.centerPanel}>
-        <h3>Családfa Szerkesztő</h3>
-        <CanvasFamilyTreeEditor />
-      </div>
-      
-      <div class={style.rightPanel}>
-        <h3>Customize display</h3>
-        <div class={style.customizeTabs}>
-          <button class={style.activeTab}>Personal</button>
-          <button>Biography</button>
-          <button>Colors</button>
-          <button>Lines</button>
-        </div>
-        <div class={style.optionsList}>
-          {(Object.keys(displayOptions()) as DisplayOption[]).map((key) => (
-            <label class={style.optionItem}>
-              <input
-                type="checkbox"
-                checked={displayOptions()[key]}
-                onChange={() => toggleOption(key)}
-              />
-              {key.charAt(0).toUpperCase() + key.slice(1)}
-            </label>
-          ))}
-        </div>
-        <button class={style.clearButton}>
-          <span class={style.icon}>🗑️</span> Clear
-        </button>
-      </div>
-    </div>
   );
 }

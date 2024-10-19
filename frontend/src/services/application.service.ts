@@ -18,8 +18,9 @@ export class ApplicationService {
     public setBearerToken(token?: string): void { this.BearerToken = token; }
 
     constructor() {
+        /* Trees */
         // @ts-ignore
-        window.trees.listen(data => {
+        window.trees.listen((data: any): void => {
             this.treesCallback(
                 data.action,
                 data.response
@@ -27,6 +28,7 @@ export class ApplicationService {
         });
     }
 
+    /* Trees */
     private treesCallback = (action: string, response: any): void => {
         switch (action) {
             case 'getTrees':
@@ -36,7 +38,6 @@ export class ApplicationService {
                 break;
         }
     }
-
     public getTrees(): void {
         // @ts-ignore
         window.trees.getTrees(this.BearerToken);
