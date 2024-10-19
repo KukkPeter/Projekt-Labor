@@ -1,5 +1,7 @@
 export interface Tree {
-    id: string;
-    name: string;
-    lastModified: string;
+    id: number;
+    title: string;
+    ownerId: number;
+    createdAt: string;
+    updatedAt: string;
 }

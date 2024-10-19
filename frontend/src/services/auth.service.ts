@@ -21,6 +21,7 @@ export class AuthService {
     get User(): User { return this.user.getValue(); }
 
     private bearerToken?: string;
+    get BearerToken(): string { return this.bearerToken || ''; }
 
     private toastId?: string;
 
@@ -40,6 +41,7 @@ export class AuthService {
                 if(response.status === 200) {
                     this.authenticated.next(true);
                     this.bearerToken = response.data;
+                    this.app.setBearerToken(response.data);
 
                     // @ts-ignore
                     window.authentication.getMyself(this.bearerToken);
@@ -71,6 +73,7 @@ export class AuthService {
                 if(response.status === 200) {
                     this.authenticated.next(false);
                     this.bearerToken = undefined;
+                    this.app.setBearerToken(undefined);
                     this.user.next({} as User);
 
                     // Redirect to 'Authentication' page

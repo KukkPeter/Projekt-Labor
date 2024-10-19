@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import {RemoveListener, RendererOnCallback} from "./interfaces/api.interface";
+import { RemoveListener, RendererOnCallback } from "./interfaces/api.interface";
 
 const receiveMessage = (channel: string, func: RendererOnCallback): RemoveListener => {
     const subscription: RendererOnCallback = (event, ...args) => {
@@ -14,6 +14,9 @@ const receiveMessage = (channel: string, func: RendererOnCallback): RemoveListen
     }
 };
 
+/**
+ * User (authentication)
+ * */
 contextBridge.exposeInMainWorld(
     'authentication', {
         login: (email: string, password: string) => {
@@ -42,6 +45,40 @@ contextBridge.exposeInMainWorld(
         },
         listen: (callback: RendererOnCallback): RemoveListener => {
             return receiveMessage('authentication', callback);
+        }
+    }
+);
+
+/**
+ * Trees
+ * */
+contextBridge.exposeInMainWorld(
+    'trees', {
+        getTrees: (bearer_token: string) => {
+            ipcRenderer.send('trees:getTrees', {
+                token: bearer_token
+            });
+        },
+        getTree: (bearer_token: string, tree_identifier: number) => {
+            ipcRenderer.send('trees:getTree', {
+                token: bearer_token,
+                treeId: tree_identifier
+            });
+        },
+        deleteTree: (bearer_token: string, tree_identifier: number) => {
+            ipcRenderer.send('trees:deleteTree', {
+                token: bearer_token,
+                treeId: tree_identifier
+            });
+        },
+        createTree: (bearer_token: string, title: string) => {
+            ipcRenderer.send('trees:createTree', {
+                token: bearer_token,
+                title: title
+            });
+        },
+        listen: (callback: RendererOnCallback): RemoveListener => {
+            return receiveMessage('trees', callback);
         }
     }
 );

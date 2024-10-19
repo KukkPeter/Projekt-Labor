@@ -11,27 +11,51 @@ export class ApplicationService {
     get CurrentPage(): Pages { return this.currentPage.getValue(); }
     public setCurrentPage(page: Pages): void { this.currentPage.next(page); }
 
-    constructor() { }
+    private trees: BehaviorSubject<Tree[]> = new BehaviorSubject<Tree[]>([] as Tree[]);
+    public trees$: Observable<Tree[]> = this.trees.asObservable();
 
-    public async getTrees(): Promise<Tree[]> {
-        // TODO: get trees from database
-        return new Promise((resolve, reject): void => {
-           resolve([
-               {
-                   id: "test_id_00",
-                   name: "Test Family tree #00",
-                   lastModified: "Yesterday"
-               },
-               {
-                   id: "test_id_01",
-                   name: "Test Family tree #01",
-                   lastModified: "Yesterday"
-               }
-           ])
+    private BearerToken?: string;
+    public setBearerToken(token?: string): void { this.BearerToken = token; }
+
+    constructor() {
+        // @ts-ignore
+        window.trees.listen(data => {
+            this.treesCallback(
+                data.action,
+                data.response
+            );
         });
     }
 
-    public openEditor(treeIdentifier: string): void {
+    private treesCallback = (action: string, response: any): void => {
+        switch (action) {
+            case 'getTrees':
+                this.trees.next(response.data as Tree[]);
+                break;
+            default:
+                break;
+        }
+    }
+
+    public getTrees(): void {
+        // @ts-ignore
+        window.trees.getTrees(this.BearerToken);
+    }
+    public createTree(title: string): void {
+        // @ts-ignore
+        window.trees.createTree(this.BearerToken, title);
+    }
+    public deleteTree(treeId: number): void {
+        // @ts-ignore
+        window.trees.deleteTree(this.BearerToken, treeId);
+
+        setTimeout((): void => {
+            // @ts-ignore
+            window.trees.getTrees(this.BearerToken);
+        }, 100);
+    }
+
+    public openEditor(treeIdentifier: number): void {
         // TODO: get tree details from database
         console.debug('###', treeIdentifier);
 
