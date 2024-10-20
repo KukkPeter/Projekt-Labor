@@ -9,11 +9,15 @@ export default function(): JSX.Element {
   const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
 
   const saveChanges = (): void => {
-    // TODO
+    if(confirm('Are you certain you want to save the changes?\nThis will replace the previous version!')) {
+      // TODO
+    }
   }
 
   const deleteTree = (): void => {
-    // TODO
+    if(confirm('Are you certain you want to remove this tree?\nThis action cannot be reversed!')) {
+      // TODO
+    }
   }
 
   return <>
