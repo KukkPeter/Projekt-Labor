@@ -1,12 +1,13 @@
-import { Sequelize } from 'sequelize';
+import { Dialect, Sequelize } from 'sequelize';
+require('dotenv').config()
 
 const sequelize = new Sequelize(
-    "projekt_labor",             // Adatbázis neve
-    "root",                     // Felhasználó név
-    "",                         // Jelszó az adatbázishoz
+    process.env.DATABASE_NAME,                      // Adatbázis neve
+    process.env.DATABASE_USER,                      // Felhasználó név
+    process.env.DATABASE_PASSWORD,                  // Jelszó az adatbázishoz
     {
-        host: "localhost",      // Adatbázis elérési útja
-        dialect: "mysql",
+        host: process.env.DATABASE_HOST,            // Adatbázis elérési útja
+        dialect: process.env.DATABASE_DIALECT as Dialect,
         pool: {
             max: 5,
             min: 0,
