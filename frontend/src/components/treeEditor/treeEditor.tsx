@@ -133,7 +133,7 @@ const CanvasFamilyTreeEditor = () => {
       // Draw root person's name
       ctx.fillStyle = 'black';
       ctx.font = 'bold 16px Arial';
-      ctx.fillText(`Gyökér: ${rootPerson()}`, 10, 20);
+      ctx.fillText(`Root person: ${rootPerson()}`, 10, 20);
 
       return drawnNodes;
     };
@@ -231,33 +231,33 @@ const CanvasFamilyTreeEditor = () => {
               onInput={(e) => setNewPerson(e.target.value)}
               placeholder="Új személy neve"
           />
-          <button onClick={addPerson}>Személy hozzáadása</button>
+          <button onClick={addPerson}>Adding new person</button>
 
           <select
               value={newRelationship().person1}
               onChange={(e) => setNewRelationship({...newRelationship(), person1: e.target.value})}
           >
-            <option value="">Válassz személyt</option>
+            <option value="">Choose a person</option>
             {people().map(person => <option value={person}>{person}</option>)}
           </select>
           <select
               value={newRelationship().type}
               onChange={(e) => setNewRelationship({...newRelationship(), type: e.target.value})}
           >
-            <option value="">Kapcsolat típusa</option>
-            <option value="parent">Szülő</option>
-            <option value="sibling">Testvér</option>
-            <option value="child">Gyermek</option>
-            <option value="spouse">Házastárs</option>
+            <option value="">Relation type</option>
+            <option value="parent">Parent</option>
+            <option value="sibling">Sibling</option>
+            <option value="child">Child</option>
+            <option value="spouse">Spouse</option>
           </select>
           <select
               value={newRelationship().person2}
               onChange={(e) => setNewRelationship({...newRelationship(), person2: e.target.value})}
           >
-            <option value="">Válassz személyt</option>
+            <option value="">Choose a person</option>
             {people().map(person => <option value={person}>{person}</option>)}
           </select>
-          <button onClick={addRelationship}>Kapcsolat hozzáadása</button>
+          <button onClick={addRelationship}>Add relation</button>
         </div>
         <canvas ref={canvasRef} class={style.familyTreeCanvas}></canvas>
       </div>
@@ -302,10 +302,10 @@ export default function TreeEditor(): JSX.Element {
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                 <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512l388.6 0c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304l-91.4 0z"/>
               </svg>
-              <p>Kukk Regenye Szűcs</p>
+              <p>Szűcs Gergely</p>
             </div>
             <button class={style.btnLogout}>
-              Kijelentkezés
+              Logout
             </button>
           </div>
 
@@ -315,7 +315,7 @@ export default function TreeEditor(): JSX.Element {
 
           {showPersonalInfo() && (
               <div class={style.selectedPerson}>
-                <h2>selected person (Teszt Aladár)</h2>
+                <h2>selected person (Szűcs Gergely)</h2>
                 <div class={style.tabs}>
                   <button
                       class={activeTab() === 'personal' ? style.activeTab : ''}
@@ -339,22 +339,22 @@ export default function TreeEditor(): JSX.Element {
 
                 {activeTab() === 'personal' && (
                     <div class={style.personalInfo}>
-                      <p><strong>Full name:</strong> Teszt Aladár</p>
+                      <p><strong>Full name:</strong> Szűcs Gergely</p>
                       <p><strong>Gender:</strong> male</p>
                       <p><strong>Birth place:</strong> Veszprém</p>
-                      <p><strong>Birth date:</strong> 2006. 09. 15.</p>
+                      <p><strong>Birth date:</strong> 2002. 10. 10.</p>
                     </div>
                 )}
 
                 {activeTab() === 'biography' && (
                     <div class={style.biographyInfo}>
-                      <p>Teszt Aladár rövid életrajza itt lesz olvasható. Ez egy példa szöveg az életrajz bemutatására.</p>
+                      <p>Here is a brief biography of Gergely Szűcs. This is an example text for presenting the biography.</p>
                     </div>
                 )}
 
                 {activeTab() === 'upload' && (
                     <div class={style.uploadInfo}>
-                      <p>Itt lesz lehetőség feltölteni a személyhez kapcsolódó dokumentumokat vagy képeket.</p>
+                      <p>Here will be the option to upload documents or images related to the person.</p>
                     </div>
                 )}
 
@@ -373,7 +373,7 @@ export default function TreeEditor(): JSX.Element {
           </div>
         </div>
         <div class={style.centerPanel}>
-          <h3>Családfa Szerkesztő</h3>
+          <h3>Family Tree Editor</h3>
           <CanvasFamilyTreeEditor />
         </div>
 
