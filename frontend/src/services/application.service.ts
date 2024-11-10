@@ -3,6 +3,7 @@ import {BehaviorSubject, Observable} from "rxjs";
 
 import { Pages } from "../interfaces/pages.interface";
 import { Tree } from "../interfaces/tree.interface";
+import {Person} from "../components/canvas/types";
 
 @singleton()
 export class ApplicationService {
@@ -53,10 +54,12 @@ export class ApplicationService {
             this.getTrees();
         }, 100);
     }
-    public deleteTree(treeId: number): void {
+    public deleteTree(treeId?: number): void {
+        let treeIdentifier: number = treeId ?? this.currentTree.getValue().id;
+
         if(confirm('Are you sure you want to delete this tree?')) {
             // @ts-ignore
-            window.trees.deleteTree(this.BearerToken, treeId);
+            window.trees.deleteTree(this.BearerToken, treeIdentifier);
 
             setTimeout((): void => {
                 // @ts-ignore
@@ -64,7 +67,12 @@ export class ApplicationService {
             }, 100);
         }
     }
+    public saveTree(data: string, deletePeople: Person[], addPeople: Person[]): void {
+        // @ts-ignore
+        window.trees.updateTree(this.BearerToken, this.currentTree.getValue().id, data);
 
+        // TODO: make delete queries to deletePeople and make add queries to addPeople
+    }
     public openEditor(treeIdentifier: number): void {
         const trees = this.trees.getValue();
 

@@ -1,9 +1,9 @@
-import { Pages } from "../../interfaces/pages.interface";
-import {createSignal, JSX, Match, Switch} from "solid-js";
+import {createSignal, JSX, Match, Show, Switch} from "solid-js";
 
 import style from './personInfo.module.css';
+import {Person} from "../canvas/types";
 
-export default function(): JSX.Element {
+export default function(props: { person: Person }): JSX.Element {
   const [menu, setMenu] = createSignal('Personal');
 
   const addRelative = (): void => {
@@ -12,12 +12,24 @@ export default function(): JSX.Element {
 
   return <>
     <div class={style.personInfo}>
-      <h3>Selected Person: <span>John Doe</span></h3>
+      <h3>Selected Person: <span>{`${props.person.firstName} ${props.person.lastName}`}</span></h3>
       <div class={style.menu}>
-        <button class={menu() !== 'Personal' ? style.unselected : ''} onClick={(): void => { setMenu('Personal'); }}>
+        <button
+          class={menu() !== 'Personal' ? style.unselected : ''}
+          onClick={(): void => { setMenu('Personal'); }}
+          style={{
+            'width': (!props.person.description && !props.person.title) ? '100%' : ''
+          }}
+        >
           Personal
         </button>
-        <button class={menu() !== 'Biography' ? style.unselected : ''} onClick={(): void => { setMenu('Biography'); }}>
+        <button
+          class={menu() !== 'Biography' ? style.unselected : ''}
+          onClick={(): void => { setMenu('Biography'); }}
+          style={{
+            'display': (!props.person.description && !props.person.title) ? 'none' : ''
+          }}
+        >
           Biography
         </button>
       </div>
@@ -25,28 +37,45 @@ export default function(): JSX.Element {
         <Match when={menu() === 'Personal'}>
           <div class={style.content}>
             <p>
-              <strong>Full Name:</strong> John Doe
+              <strong>Full Name:</strong>&nbsp;{`${props.person.firstName} ${props.person.lastName}`}
             </p>
             <p>
-              <strong>Gender:</strong> Male
+              <strong>First Name:</strong>&nbsp;{props.person.firstName}
             </p>
             <p>
-              <strong>Birth place:</strong> Veszprém
+              <strong>Last Name:</strong>&nbsp;{props.person.lastName}
+            </p>
+            <Show when={props.person.nickName}>
+              <p>
+                <strong>Nickname:</strong>&nbsp;{props.person.nickName}
+              </p>
+            </Show>
+            <p>
+              <strong>Gender:</strong>&nbsp;{props.person.gender}
             </p>
             <p>
-              <strong>Birth date:</strong> 2006.09.15
+              <strong>Birth date:</strong>&nbsp;{props.person.birthDate}
             </p>
+            <Show when={props.person.deathDate}>
+              <p>
+                <strong>Death date:</strong>&nbsp;{props.person.deathDate}
+              </p>
+            </Show>
           </div>
         </Match>
         <Match when={menu() === 'Biography'}>
           <div class={style.content}>
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent vitae eros ut justo venenatis imperdiet ac vel turpis. Donec aliquet semper mattis. Phasellus tincidunt nulla in efficitur consectetur.
-            </p>
+            <Show when={props.person.title}>
+              <p><strong>Title:</strong>&nbsp;{props.person.title!}</p>
+            </Show>
+            <Show when={props.person.description}>
+              <p>
+                {props.person.description!}
+              </p>
+            </Show>
           </div>
         </Match>
       </Switch>
-      <button onClick={addRelative}>Add a relative</button>
     </div>
   </>;
 }

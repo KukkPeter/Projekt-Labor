@@ -76,6 +76,34 @@ export function treesService(
     });
 
     /**
+     * Update
+     * */
+    ipcMain.on('trees:updateTree', (e: IpcMainEvent, item: {
+        token: string;
+        treeId: number;
+        body: string
+    }): void => {
+        fetch(`${Config.API}/trees/update/${item.treeId}`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${item.token}`
+            },
+            body: JSON.stringify({
+                newValue: item.body
+            })
+        })
+          .then(res => res.json())
+          .then((res: any): void => {
+              browserWindow.webContents.send('trees', {
+                  action: 'updateTree',
+                  response: res
+              });
+          })
+    });
+
+    /**
      * Create
      * */
     ipcMain.on('trees:createTree', (e: IpcMainEvent, item: {

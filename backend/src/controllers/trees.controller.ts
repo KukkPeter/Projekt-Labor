@@ -1,6 +1,7 @@
 import { Request, Security, Route, Get, Post, Delete, Body, Controller, Tags, Path } from 'tsoa';
 import { IResponse } from "../interfaces/IResponse.interface";
 import { CreateNewTree } from "../interfaces/createNewTree.interface";
+import { UpdateTreeData } from "../interfaces/updateTreeData.interface";
 
 import TreesService from '../services/trees.service';
 
@@ -39,6 +40,18 @@ export class TreesController extends Controller {
         return {
             status: 200,
             message: `Successfully created new tree!`,
+            data: tree
+        };
+    }
+
+    @Post('/update/{treeId}')
+    @Security('jwt')
+    public async updateTreeData(@Path() treeId: number, @Body() body: UpdateTreeData): Promise<IResponse> {
+        const tree = await TreesService.updateTreeData(treeId, body);
+
+        return {
+            status: 200,
+            message: `Successfully updated the tree data!`,
             data: tree
         };
     }

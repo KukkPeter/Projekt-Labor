@@ -138,6 +138,9 @@
     background-color: #dc3545;
     color: #fff;
 }
+.modal > .modalFooter > .button:global.full {
+    width: 100%;
+}
 .overlay {
     position: absolute;
     width: 100%;

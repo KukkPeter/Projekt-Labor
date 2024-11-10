@@ -3,6 +3,9 @@ export = (sequelize: any, Sequelize: any) => {
     title: {
       type: Sequelize.STRING
     },
+    treeData: {
+      type: Sequelize.JSON
+    },
     ownerId: {
       type: Sequelize.INTEGER
     }

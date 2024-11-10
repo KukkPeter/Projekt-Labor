@@ -1,14 +1,3 @@
-export interface Node {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
-
-export interface NodeWithPerson extends Node {
-    person: Person;
-}
-
 export interface Person {
     id: number;
     firstName: string;
@@ -36,19 +25,4 @@ export interface Address {
     door: string;
     createdAt: string;
     updatedAt: string;
-}
-
-export interface Relationships {
-    person1Id: number;
-    person2Id: number;
-    type: RelationTypes;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export enum RelationTypes {
-    parent = 'parent',
-    sibling = 'sibling',
-    child = 'child',
-    spouse = 'spouse'
 }

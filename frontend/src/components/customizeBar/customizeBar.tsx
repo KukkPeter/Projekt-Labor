@@ -22,19 +22,20 @@ export default function(props: {
   searchTerm: {
     getter: Accessor<string>,
     setter: Setter<string>
-  }
+  },
+  saveTree: () => void
 }): JSX.Element {
   const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
 
   const saveChanges = (): void => {
     if(confirm('Are you certain you want to save the changes?\nThis will replace the previous version!')) {
-      // TODO
+      props.saveTree();
     }
   }
 
   const deleteTree = (): void => {
     if(confirm('Are you certain you want to remove this tree?\nThis action cannot be reversed!')) {
-      // TODO
+      app.deleteTree();
     }
   }
 

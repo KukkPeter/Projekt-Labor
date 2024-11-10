@@ -1,4 +1,4 @@
-import {Accessor, from, JSX, Show, useContext} from "solid-js";
+import {Accessor, from, JSX, Match, Show, Switch, useContext} from "solid-js";
 
 import {AuthService} from '../../services/auth.service';
 import {DIContextProvider} from '../../services/context-provider';
@@ -11,10 +11,11 @@ import {ApplicationService} from "../../services/application.service";
 import PersonInfo from "../personInfo/personInfo";
 import {ModalRootElement} from "../modal/modal.types";
 import { Modal } from "../modal/modal";
+import {Person} from "../canvas/types";
 
 export default function(props: {
     page: Pages.Home | Pages.Editor,
-    selectedPerson?: any
+    selectedPerson?: Person
 }): JSX.Element {
   let createNewTreeModal!: ModalRootElement;
   let createNewTreeNameInput!: HTMLInputElement;
@@ -26,10 +27,6 @@ export default function(props: {
 
   const logout = (): void => {
     auth.logout();
-  }
-
-  const createNewTree = (): void => {
-    console.debug('TODO: createNewTree');
   }
 
   const backToTheMainMenu = (): void => {
@@ -65,9 +62,25 @@ export default function(props: {
           </button>
           <hr/>
           <div class={style.editorTab}>
-            <button>Create a new person</button>
-            <hr/>
-            <PersonInfo/>
+            <Switch>
+              <Match when={props.selectedPerson}>
+                <PersonInfo person={props.selectedPerson!} />
+              </Match>
+              <Match when={!props.selectedPerson}>
+                <div style="margin: 8px;">
+                  <h3>Help</h3>
+                  <p>Here is some instructions to use the editor:</p>
+                  <ul>
+                    <li>You can zoom with your mouse wheel!</li>
+                    <li>You can move around in the canvas with the right mouse button pressing, or with this wheel
+                      pressing.
+                    </li>
+                    <li>With a right click the context menu opens in the editor.</li>
+                    <li>If you right click a node, you can delete or add connection to another node.</li>
+                  </ul>
+                </div>
+              </Match>
+            </Switch>
           </div>
         </Show>
       </div>

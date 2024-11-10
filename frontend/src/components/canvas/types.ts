@@ -1,24 +1,14 @@
-// types.ts
-export interface NodeDetails {
-  birthDate: string;
-  birthPlace: string;
-  occupation: string;
-  notes: string;
-  [key: string]: string; // Allow for additional custom fields
-}
-
 export interface TreeNode {
-  id: number;
+  id: any;
   name: string;
   x: number;
   y: number;
-  details: NodeDetails;
 }
 
 export interface TreeEdge {
-  id: number;
-  parentId: number;
-  childId: number;
+  id: string;
+  parentId: any;
+  childId: any;
   type: RelationType;
 }
 
@@ -37,4 +27,33 @@ export interface Theme {
   backgroundColor: string;
   textColor: string;
   gridColor: string;
+}
+
+export interface Person {
+  id: any;
+  firstName: string;
+  lastName: string;
+  nickName?: string;
+  title?: string;
+  gender: 'male' | 'female' | null;
+  birthDate: string;
+  deathDate?: string | null;
+  description?: string;
+  treeId: number;
+  createdAt: string;
+  updatedAt: string;
+  addresses?: Address[] | null;
+}
+
+export interface Address {
+  id: number;
+  personId: number;
+  addressType: 'residence' | 'birth' | 'death';
+  country: string;
+  postalCode: string;
+  city: string;
+  street: string;
+  door: string;
+  createdAt: string;
+  updatedAt: string;
 }

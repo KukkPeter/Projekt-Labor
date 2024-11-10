@@ -1,6 +1,6 @@
-import {createSignal, onMount, createEffect, Show, JSX, onCleanup, Accessor, Setter, Switch, Match} from 'solid-js';
+import { createSignal, onMount, createEffect, Show, JSX, onCleanup, Accessor, Setter, Switch, Match } from 'solid-js';
 
-import { TreeNode, TreeEdge, Position, Theme, NodeDetails, RelationType } from './types';
+import { TreeNode, TreeEdge, Position, Theme, RelationType } from './types';
 
 export default function(props: {
   snapToGrid: Accessor<boolean>,
@@ -17,12 +17,14 @@ export default function(props: {
     getter: Accessor<TreeEdge[]>,
     setter: Setter<TreeEdge[]>
   },
-  searchTerm: Accessor<string>
+  searchTerm: Accessor<string>,
+  addNewPerson: (x: number, y: number) => void,
+  selectedNode: {
+    getter: Accessor<TreeNode | null>,
+    setter: Setter<TreeNode | null>
+  }
 }): JSX.Element {
   let canvasRef!: HTMLCanvasElement;
-  let nameInput!: HTMLInputElement;
-  
-  const [selectedNode, setSelectedNode] = createSignal<TreeNode | null>(null);
   
   const [isDragging, setIsDragging] = createSignal<boolean>(false);
   const [dragOffset, setDragOffset] = createSignal<Position>({ x: 0, y: 0 });
@@ -65,19 +67,6 @@ export default function(props: {
     };
   };
 
-  const addFamilyMember = (name: string, x: number, y: number, details: NodeDetails = {} as NodeDetails): void => {
-    const transformed = inverseTransform(x, y);
-    const snapped = snapToGridPosition(transformed.x, transformed.y);
-
-    props.nodes.setter([...props.nodes.getter(), {
-      id: Date.now(),
-      name,
-      x: snapped.x,
-      y: snapped.y,
-      details: details
-    } as TreeNode]);
-  }
-
   const drawGrid = (ctx: CanvasRenderingContext2D): void => {
     if (!props.snapToGrid()) return;
 
@@ -104,10 +93,11 @@ export default function(props: {
   };
 
   const addConnection = (parentId: number, childId: number): void => {
+    // TODO: set relationship type with modal
     props.edges.setter([...props.edges.getter(), {
-      id: Date.now(),
-      parentId,
-      childId,
+      id: `NEW-${Date.now()}`,
+      parentId: parentId,
+      childId: childId,
       type: relationshipType()
     } as TreeEdge]);
   }
@@ -115,7 +105,7 @@ export default function(props: {
   const deleteNode = (nodeId: number): void => {
     props.nodes.setter(props.nodes.getter().filter(n => n.id !== nodeId));
     props.edges.setter(props.edges.getter().filter(e => e.parentId !== nodeId && e.childId !== nodeId));
-    setSelectedNode(null);
+    props.selectedNode.setter(null);
     setShowContextMenu(false);
   };
 
@@ -209,7 +199,7 @@ export default function(props: {
     });
 
     props.nodes.getter().forEach((node: TreeNode): void => {
-      const isSelected = selectedNode()?.id === node.id;
+      const isSelected = props.selectedNode.getter()?.id === node.id;
       const isConnecting = connectionStart()?.id === node.id;
       drawNode(ctx, node, isSelected || isConnecting);
     });
@@ -258,28 +248,14 @@ export default function(props: {
           // Reset connection mode
           setIsConnecting(false);
           setConnectionStart(null);
-          setSelectedNode(null);
+          props.selectedNode.setter(null);
         }
-      } else {
-        // Start connection mode
-        setIsConnecting(true);
-        setConnectionStart(clickedNode);
-        setSelectedNode(clickedNode);
       }
     } else {
-      // Clicked empty space
-      if (!isDragging()) {
-        const name = nameInput.value.trim();
-        if (name) {
-          const pos = snapToGridPosition(x, y);
-          addFamilyMember(name, pos.x, pos.y);
-          nameInput.value = ''; // Clear input after adding
-        }
-      }
       // Reset connection mode if clicking empty space
       setIsConnecting(false);
       setConnectionStart(null);
-      setSelectedNode(null);
+      props.selectedNode.setter(null);
     }
   };
 
@@ -298,7 +274,7 @@ export default function(props: {
     });
 
     if (clickedNode) {
-      setSelectedNode(clickedNode);
+      props.selectedNode.setter(clickedNode);
     }
 
     setContextMenuPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
@@ -334,7 +310,7 @@ export default function(props: {
 
     if (clickedNode) {
       setIsDragging(true);
-      setSelectedNode(clickedNode);
+      props.selectedNode.setter(clickedNode);
       setDragOffset({
         x: clickedNode.x - transformed.x,
         y: clickedNode.y - transformed.y
@@ -358,7 +334,7 @@ export default function(props: {
       return;
     }
 
-    if (isDragging() && selectedNode()) {
+    if (isDragging() && props.selectedNode.getter()) {
       const rect = canvasRef.getBoundingClientRect();
       const transformed = inverseTransform(
         e.clientX - rect.left,
@@ -371,7 +347,7 @@ export default function(props: {
       );
 
       props.nodes.setter(props.nodes.getter().map(node => {
-        if (node.id === selectedNode()!.id) {
+        if (node.id === props.selectedNode.getter()!.id) {
           return { ...node, x: snapped.x, y: snapped.y };
         }
         return node;
@@ -383,7 +359,7 @@ export default function(props: {
     if (e.button === 2) { // Right click
       setIsConnecting(false);
       setConnectionStart(null);
-      setSelectedNode(null);
+      props.selectedNode.setter(null);
     }
     setIsDragging(false);
     setIsPanning(false);
@@ -406,27 +382,10 @@ export default function(props: {
     }
 
     const results = props.nodes.getter().filter(node =>
-      node.name.toLowerCase().includes(term.toLowerCase()) ||
-      Object.values(node.details).some(value =>
-        value.toString().toLowerCase().includes(term.toLowerCase())
-      )
+      node.name.toLowerCase().includes(term.toLowerCase())
     );
 
     setHighlightedNodes(results.map(n => n.id));
-  };
-
-  const saveTree = (): void => {
-    const data = {
-      nodes: props.nodes.getter(),
-      edges: props.edges.getter(),
-      theme: props.theme.getter()
-    };
-    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'family-tree.json';
-    a.click();
   };
 
   const loadTree = (event: any): void => {
@@ -481,10 +440,6 @@ export default function(props: {
       "top": "7%",
       "left": "25%",
     }}>
-      <div class="controls" style={{"margin-bottom": "1rem"}}>
-          <input type={'text'} ref={nameInput} value={'test'}/>
-      </div>
-      
       <div class="connection-status" style={{
         "position": "absolute",
         "top": "10px",
@@ -531,13 +486,23 @@ export default function(props: {
               }}
             >
               <Switch>
-                <Match when={selectedNode()}>
-                  <button onClick={(): void => deleteNode(selectedNode()!.id)}>
+                <Match when={props.selectedNode.getter()}>
+                  <button onClick={(): void => {
+                    setShowContextMenu(false);
+                    setIsConnecting(true);
+                    setConnectionStart(props.selectedNode.getter());
+                  }}>
+                    Add connection
+                  </button>
+                  <button onClick={(): void => deleteNode(props.selectedNode.getter()!.id)}>
                     Delete Node
                   </button>
                 </Match>
-                <Match when={!selectedNode()}>
-                  <button onClick={(): void => { setShowContextMenu(false); console.log('Clicked!'); }}>
+                <Match when={!props.selectedNode.getter()}>
+                  <button onClick={(): void => {
+                    setShowContextMenu(false);
+                    props.addNewPerson(contextMenuPos().x, contextMenuPos().y);
+                  }}>
                     Create new person
                   </button>
                 </Match>

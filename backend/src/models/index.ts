@@ -23,7 +23,6 @@ const db = {
   users: require('./users.model')(sequelize, Sequelize),
   trees: require('./trees.model')(sequelize, Sequelize),
   people: require('./people.model')(sequelize, Sequelize),
-  relationships: require('./relationship.model')(sequelize, Sequelize),
   addresses: require('./addresses.model')(sequelize, Sequelize)
 }
 
@@ -40,26 +39,6 @@ db.trees.hasMany(db.people, {
   foreignKey: 'treeId'
 });
 db.people.belongsTo(db.trees);
-
-// Two peoples can have a relationship
-db.people.belongsToMany(db.people, {
-  through: db.relationships,
-  as: 'personOne',
-  foreignKey: 'person1Id'
-});
-db.people.belongsToMany(db.people, {
-  through: db.relationships,
-  as: 'personTwo',
-  foreignKey: 'person2Id'
-});
-db.relationships.belongsTo(db.people, {
-  as: 'personOne',
-  foreignKey: 'person1Id'
-});
-db.relationships.belongsTo(db.people, {
-  as: 'personTwo',
-  foreignKey: 'person2Id'
-});
 
 // One person can have multiple addresses
 db.people.hasMany(db.addresses, {

@@ -78,30 +78,14 @@
 				"type": "object",
 				"additionalProperties": true
 			},
-			"CreateNewRelationship": {
+			"UpdateTreeData": {
 				"properties": {
-					"person1Id": {
-						"type": "number",
-						"format": "double"
-					},
-					"person2Id": {
-						"type": "number",
-						"format": "double"
-					},
-					"type": {
-						"type": "string",
-						"enum": [
-							"parent",
-							"sibling",
-							"child",
-							"spouse"
-						]
+					"newValue": {
+						"type": "string"
 					}
 				},
 				"required": [
-					"person1Id",
-					"person2Id",
-					"type"
+					"newValue"
 				],
 				"type": "object",
 				"additionalProperties": true
@@ -503,9 +487,9 @@
 				}
 			}
 		},
-		"/relationships/{personId}": {
-			"get": {
-				"operationId": "GetRelationshipsForPerson",
+		"/trees/update/{treeId}": {
+			"post": {
+				"operationId": "UpdateTreeData",
 				"responses": {
 					"200": {
 						"description": "Ok",
@@ -519,7 +503,7 @@
 					}
 				},
 				"tags": [
-					"Relationships"
+					"Trees"
 				],
 				"security": [
 					{
@@ -529,46 +513,20 @@
 				"parameters": [
 					{
 						"in": "path",
-						"name": "personId",
+						"name": "treeId",
 						"required": true,
 						"schema": {
 							"format": "double",
 							"type": "number"
 						}
 					}
-				]
-			}
-		},
-		"/relationships/create": {
-			"post": {
-				"operationId": "CreateNewAddress",
-				"responses": {
-					"200": {
-						"description": "Ok",
-						"content": {
-							"application/json": {
-								"schema": {
-									"$ref": "#/components/schemas/IResponse"
-								}
-							}
-						}
-					}
-				},
-				"tags": [
-					"Relationships"
 				],
-				"security": [
-					{
-						"jwt": []
-					}
-				],
-				"parameters": [],
 				"requestBody": {
 					"required": true,
 					"content": {
 						"application/json": {
 							"schema": {
-								"$ref": "#/components/schemas/CreateNewRelationship"
+								"$ref": "#/components/schemas/UpdateTreeData"
 							}
 						}
 					}

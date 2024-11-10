@@ -1,5 +1,6 @@
 import { FieldErrors, ValidateError } from "tsoa";
 import {CreateNewTree} from "../interfaces/createNewTree.interface";
+import {UpdateTreeData} from "../interfaces/updateTreeData.interface";
 
 const db = require('../models').trees;
 
@@ -43,13 +44,36 @@ class TreesService {
             if(tree === null) {
                 return await db.create({
                     title: body.title,
-                    ownerId: userId
+                    ownerId: userId,
+                    treeData: {}
                 });
             } else {
                 throw new Error('A tree with this title already exists!');
             }
         } catch(err) {
             throw new ValidateError(err as FieldErrors, "TreesService:createTree");
+        }
+    }
+
+    async updateTreeData(treeId: number, body: UpdateTreeData): Promise<any> {
+        try {
+            const tree = await db.findOne({
+                where: {
+                    id: treeId,
+                }
+            });
+
+            if(tree !== null) {
+                tree.treeData = body.newValue;
+
+                await tree.save();
+
+                return tree;
+            } else {
+                throw new Error('The tree with this ID doesn\'t exists!');
+            }
+        } catch(err) {
+            throw new ValidateError(err as FieldErrors, "TreesService:updateTreeData");
         }
     }
 

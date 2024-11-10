@@ -8,8 +8,6 @@ import { UserController } from './controllers/user.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { TreesController } from './controllers/trees.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-import { RelationshipsController } from './controllers/relationships.controller';
-// WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { PeopleController } from './controllers/people.controller';
 // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
 import { AddressesController } from './controllers/addresses.controller';
@@ -61,12 +59,10 @@ const models: TsoaRoute.Models = {
         "additionalProperties": true,
     },
     // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-    "CreateNewRelationship": {
+    "UpdateTreeData": {
         "dataType": "refObject",
         "properties": {
-            "person1Id": {"dataType":"double","required":true},
-            "person2Id": {"dataType":"double","required":true},
-            "type": {"dataType":"union","subSchemas":[{"dataType":"enum","enums":["parent"]},{"dataType":"enum","enums":["sibling"]},{"dataType":"enum","enums":["child"]},{"dataType":"enum","enums":["spouse"]}],"required":true},
+            "newValue": {"dataType":"string","required":true},
         },
         "additionalProperties": true,
     },
@@ -364,6 +360,38 @@ export function RegisterRoutes(app: Router) {
             }
         });
         // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+        app.post('/trees/update/:treeId',
+            authenticateMiddleware([{"jwt":[]}]),
+            ...(fetchMiddlewares<RequestHandler>(TreesController)),
+            ...(fetchMiddlewares<RequestHandler>(TreesController.prototype.updateTreeData)),
+
+            async function TreesController_updateTreeData(request: ExRequest, response: ExResponse, next: any) {
+            const args: Record<string, TsoaRoute.ParameterSchema> = {
+                    treeId: {"in":"path","name":"treeId","required":true,"dataType":"double"},
+                    body: {"in":"body","name":"body","required":true,"ref":"UpdateTreeData"},
+            };
+
+            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
+
+            let validatedArgs: any[] = [];
+            try {
+                validatedArgs = templateService.getValidatedArgs({ args, request, response });
+
+                const controller = new TreesController();
+
+              await templateService.apiHandler({
+                methodName: 'updateTreeData',
+                controller,
+                response,
+                next,
+                validatedArgs,
+                successStatus: undefined,
+              });
+            } catch (err) {
+                return next(err);
+            }
+        });
+        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
         app.delete('/trees/:treeId',
             authenticateMiddleware([{"jwt":[]}]),
             ...(fetchMiddlewares<RequestHandler>(TreesController)),
@@ -385,68 +413,6 @@ export function RegisterRoutes(app: Router) {
 
               await templateService.apiHandler({
                 methodName: 'deleteTree',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.get('/relationships/:personId',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(RelationshipsController)),
-            ...(fetchMiddlewares<RequestHandler>(RelationshipsController.prototype.getRelationshipsForPerson)),
-
-            async function RelationshipsController_getRelationshipsForPerson(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    personId: {"in":"path","name":"personId","required":true,"dataType":"double"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new RelationshipsController();
-
-              await templateService.apiHandler({
-                methodName: 'getRelationshipsForPerson',
-                controller,
-                response,
-                next,
-                validatedArgs,
-                successStatus: undefined,
-              });
-            } catch (err) {
-                return next(err);
-            }
-        });
-        // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-        app.post('/relationships/create',
-            authenticateMiddleware([{"jwt":[]}]),
-            ...(fetchMiddlewares<RequestHandler>(RelationshipsController)),
-            ...(fetchMiddlewares<RequestHandler>(RelationshipsController.prototype.createNewAddress)),
-
-            async function RelationshipsController_createNewAddress(request: ExRequest, response: ExResponse, next: any) {
-            const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    body: {"in":"body","name":"body","required":true,"ref":"CreateNewRelationship"},
-            };
-
-            // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
-
-            let validatedArgs: any[] = [];
-            try {
-                validatedArgs = templateService.getValidatedArgs({ args, request, response });
-
-                const controller = new RelationshipsController();
-
-              await templateService.apiHandler({
-                methodName: 'createNewAddress',
                 controller,
                 response,
                 next,

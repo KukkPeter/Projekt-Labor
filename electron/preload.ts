@@ -77,11 +77,20 @@ contextBridge.exposeInMainWorld(
                 title: title
             });
         },
+        updateTree: (bearer_token: string, tree_identifier: number, body: string) => {
+          ipcRenderer.send('trees:updateTree', {
+            token: bearer_token,
+            treeId: tree_identifier,
+            body: body
+          });
+        },
         listen: (callback: RendererOnCallback): RemoveListener => {
             return receiveMessage('trees', callback);
         }
     }
 );
+
+// TODO: make People and Address endpoints & Services
 
 // You can also expose variables, not just functions
 contextBridge.exposeInMainWorld('electronAPI', {
