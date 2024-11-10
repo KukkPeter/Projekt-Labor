@@ -1,11 +1,29 @@
-import {JSX, useContext} from "solid-js";
+import {Accessor, JSX, Setter, useContext} from "solid-js";
 
 import style from './customizeBar.module.css';
 
 import { ApplicationService } from "../../services/application.service";
 import { DIContextProvider } from "../../services/context-provider";
+import { Theme } from "../canvas/types";
 
-export default function(): JSX.Element {
+export default function(props: {
+  snapToGrid: {
+    getter: Accessor<boolean>,
+    setter: Setter<boolean>
+  },
+  gridSize: {
+    getter: Accessor<number>,
+    setter: Setter<number>
+  },
+  theme: {
+    getter: Accessor<Theme>,
+    setter: Setter<Theme>
+  },
+  searchTerm: {
+    getter: Accessor<string>,
+    setter: Setter<string>
+  }
+}): JSX.Element {
   const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
 
   const saveChanges = (): void => {
@@ -27,59 +45,149 @@ export default function(): JSX.Element {
           <h2>Customize display</h2>
         </div>
         <div class={style.options}>
+
           <label class={style.option}>
+            <p>Snap to grid</p>
             <input
               type="checkbox"
-              id="name"
-              checked={true}
+              id="snapToGrid"
+              checked={props.snapToGrid.getter()}
+              onChange={(e) => props.snapToGrid.setter(e.target.checked)}
             />
-            <p>Name</p>
           </label>
+
           <label class={style.option}>
+            <p>Grid Size</p>
             <input
-              type="checkbox"
-              id="nickname"
+              type="number"
+              id="size"
+              value={props.gridSize.getter()}
+              min={1}
+              max={100}
+              onInput={(e) => {
+                const value = parseInt(e.target.value);
+                if (value === 0) {
+                  props.gridSize.setter(20);
+                } else {
+                  props.gridSize.setter(value)
+                }
+              }}
             />
-            <p>Nickname</p>
           </label>
+
+          <hr/>
+
           <label class={style.option}>
+            <p>Node Color</p>
             <input
-              type="checkbox"
-              id="age"
-              checked={true}
+              type={'color'}
+              id={'nodeColor'}
+              value={props.theme.getter().nodeColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.nodeColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
             />
-            <p>Age</p>
           </label>
+
           <label class={style.option}>
+            <p>Selected Color</p>
             <input
-              type="checkbox"
-              id="birth_date"
-              checked={true}
+              type={'color'}
+              id={'selectedColor'}
+              value={props.theme.getter().selectedColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.selectedColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
             />
-            <p>Birth date</p>
           </label>
+
           <label class={style.option}>
+            <p>Highlight Color</p>
             <input
-              type="checkbox"
-              id="birth_place"
-              checked={true}
+              type={'color'}
+              id={'highlightColor'}
+              value={props.theme.getter().highlightColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.highlightColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
             />
-            <p>Birth place</p>
           </label>
+
           <label class={style.option}>
+            <p>Connection Color</p>
             <input
-              type="checkbox"
-              id="death_date"
+              type={'color'}
+              id={'edgeColor'}
+              value={props.theme.getter().edgeColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.edgeColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
             />
-            <p>Death date</p>
           </label>
+
           <label class={style.option}>
+            <p>Background Color</p>
             <input
-              type="checkbox"
-              id="death_place"
+              type={'color'}
+              id={'bgColor'}
+              value={props.theme.getter().backgroundColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.backgroundColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
             />
-            <p>Death place</p>
           </label>
+
+          <label class={style.option}>
+            <p>Text Color</p>
+            <input
+              type={'color'}
+              id={'textColor'}
+              value={props.theme.getter().textColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.textColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
+            />
+          </label>
+
+          <label class={style.option}>
+            <p>Grid Color</p>
+            <input
+              type={'color'}
+              id={'gridColor'}
+              value={props.theme.getter().gridColor}
+              onChange={(e) => {
+                let oldValue: Theme = props.theme.getter();
+                oldValue.gridColor = e.target.value;
+                props.theme.setter(oldValue)
+              }}
+            />
+          </label>
+
+          <hr/>
+
+          <label class={style.option}>
+            <p>Search</p>
+            <input
+              type="text"
+              id="searchTree"
+              placeholder="Search family members..."
+              value={props.searchTerm.getter()}
+              onInput={(e) => props.searchTerm.setter(e.target.value)}
+            />
+          </label>
+
         </div>
       </div>
       <hr/>
@@ -88,7 +196,8 @@ export default function(): JSX.Element {
           saveChanges();
         }}>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
-            <path d="M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"></path>
+            <path
+              d="M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"></path>
           </svg>
           <p>Save changes</p>
         </button>

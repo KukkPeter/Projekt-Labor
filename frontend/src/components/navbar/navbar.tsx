@@ -9,11 +9,16 @@ import {User} from "../../interfaces/user.interface";
 import {Pages} from "../../interfaces/pages.interface";
 import {ApplicationService} from "../../services/application.service";
 import PersonInfo from "../personInfo/personInfo";
+import {ModalRootElement} from "../modal/modal.types";
+import { Modal } from "../modal/modal";
 
 export default function(props: {
     page: Pages.Home | Pages.Editor,
     selectedPerson?: any
 }): JSX.Element {
+  let createNewTreeModal!: ModalRootElement;
+  let createNewTreeNameInput!: HTMLInputElement;
+
   const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
   const auth: AuthService = useContext(DIContextProvider)!.resolve(AuthService);
 
@@ -49,7 +54,7 @@ export default function(props: {
 
       <div class={style.menuSection}>
         <Show when={props.page === Pages.Home}>
-            <button onClick={createNewTree}>Create new family tree</button>
+            <button onClick={(): void => createNewTreeModal.show()}>Create new family tree</button>
         </Show>
         <Show when={props.page === Pages.Editor}>
           <button class={style.backToMainMenu} onClick={backToTheMainMenu}>
@@ -62,13 +67,47 @@ export default function(props: {
           <div class={style.editorTab}>
             <button>Create a new person</button>
             <hr/>
-
             <PersonInfo/>
-
           </div>
         </Show>
       </div>
     </div>
-  </>
-    ;
+
+    <Modal
+      ref={createNewTreeModal}
+      shouldCloseOnBackgroundClick={false}
+      hideCloseButton={true}
+      title={'New family tree'}
+      buttons={[
+        {
+          label: 'Create',
+          type: 'success',
+          onClick: (): void => {
+            createNewTreeModal.close();
+
+            const value: string = createNewTreeNameInput.value;
+            createNewTreeNameInput.value = "";
+
+            app.createTree(value);
+          }
+        },
+        {
+          label: 'Cancel',
+          type: 'secondary',
+          onClick: (): void => {
+            createNewTreeModal.close();
+          }
+        }
+      ]}
+    >
+      <div class={style.createNewTreeModal}>
+        <label>Name:</label>
+        <input
+          ref={createNewTreeNameInput}
+          placeholder="Family Tree Name"
+          type="text"
+        />
+      </div>
+    </Modal>
+  </>;
 };

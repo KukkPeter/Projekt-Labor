@@ -1,156 +1,550 @@
-import {
-    createSignal,
-    onMount,
-    JSX,
-    Accessor, onCleanup,
-} from "solid-js";
+import {createSignal, onMount, createEffect, Show, JSX, onCleanup, Accessor, Setter, Switch, Match} from 'solid-js';
 
-import style from './canvas.module.css';
+import { TreeNode, TreeEdge, Position, Theme, NodeDetails, RelationType } from './types';
 
-import {
-    Node,
-    NodeWithPerson,
-    Person,
-    Relationships,
-    RelationTypes
-} from "../../interfaces/canvas.interface";
+export default function(props: {
+  snapToGrid: Accessor<boolean>,
+  gridSize: Accessor<number>,
+  theme: {
+    getter: Accessor<Theme>,
+    setter: Setter<Theme>
+  },
+  nodes: {
+    getter: Accessor<TreeNode[]>,
+    setter: Setter<TreeNode[]>
+  },
+  edges: {
+    getter: Accessor<TreeEdge[]>,
+    setter: Setter<TreeEdge[]>
+  },
+  searchTerm: Accessor<string>
+}): JSX.Element {
+  let canvasRef!: HTMLCanvasElement;
+  let nameInput!: HTMLInputElement;
+  
+  const [selectedNode, setSelectedNode] = createSignal<TreeNode | null>(null);
+  
+  const [isDragging, setIsDragging] = createSignal<boolean>(false);
+  const [dragOffset, setDragOffset] = createSignal<Position>({ x: 0, y: 0 });
+  const [zoom, setZoom] = createSignal<number>(1);
+  const [pan, setPan] = createSignal<Position>({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = createSignal<boolean>(false);
+  const [lastPanPoint, setLastPanPoint] = createSignal<Position>({ x: 0, y: 0 });
+  
+  const [showContextMenu, setShowContextMenu] = createSignal<boolean>(false);
+  const [contextMenuPos, setContextMenuPos] = createSignal<Position>({ x: 0, y: 0 });
+  
+  const [relationshipType, setRelationshipType] = createSignal<RelationType>('parent');
 
-interface CanvasProps {
-    treeId: number;
-    people: Accessor<Person[]>;
-    relations: Accessor<Relationships[]>;
-}
+  const [highlightedNodes, setHighlightedNodes] = createSignal<number[]>([]);
+  
+  const [isConnecting, setIsConnecting] = createSignal<boolean>(false);
+  const [connectionStart, setConnectionStart] = createSignal<TreeNode | null>(null);
+  
+  const [lastMousePos, setLastMousePos] = createSignal<Position>({ x: 0, y: 0 });
 
-export default function(props: CanvasProps): JSX.Element {
-    let container!: HTMLDivElement;
-    let canvas!: HTMLCanvasElement;
+  const NODE_RADIUS: number = 40;
+  let observer!: ResizeObserver;
 
-    const [context, setContext] = createSignal<CanvasRenderingContext2D>({} as CanvasRenderingContext2D);
-    
-    const [rootPerson, setRootPerson] = createSignal<Person>({} as Person);
-    const [drawnNodes, setDrawnNodes] = createSignal<NodeWithPerson[]>([] as NodeWithPerson[]);
+  const transform = (x: number, y: number): { x: number; y: number } => ({
+    x: (x - pan().x) * zoom(),
+    y: (y - pan().y) * zoom()
+  });
 
-    const settings = {
-        nodeWidth: 120,
-        nodeHeight: 40,
-        horizontalSpacing: 20,
-        verticalSpacing: 80
+  const inverseTransform = (x: number, y: number): { x: number; y: number } => ({
+    x: x / zoom() + pan().x,
+    y: y / zoom() + pan().y
+  });
+
+  const snapToGridPosition = (x: number, y: number): { x: number; y: number; } => {
+    if (!props.snapToGrid()) return { x, y };
+    const size = props.gridSize();
+    return {
+      x: Math.round(x / size) * size,
+      y: Math.round(y / size) * size
     };
+  };
 
-    /* Initialization */
-    onMount((): void => {
-        // Settings canvas 2D context
-        setContext(canvas.getContext('2d')! as CanvasRenderingContext2D);
+  const addFamilyMember = (name: string, x: number, y: number, details: NodeDetails = {} as NodeDetails): void => {
+    const transformed = inverseTransform(x, y);
+    const snapped = snapToGridPosition(transformed.x, transformed.y);
 
-        window.addEventListener('resize', resizeCanvas);
+    props.nodes.setter([...props.nodes.getter(), {
+      id: Date.now(),
+      name,
+      x: snapped.x,
+      y: snapped.y,
+      details: details
+    } as TreeNode]);
+  }
 
-        // Clear canvas
-        clearCanvas();
+  const drawGrid = (ctx: CanvasRenderingContext2D): void => {
+    if (!props.snapToGrid()) return;
 
-        // Initial draw with rootPerson() equals the first person in the people prop
-        setRootPerson(props.people()[0]);
+    const size = props.gridSize() * zoom();
+    const width = canvasRef.width;
+    const height = canvasRef.height;
 
-        setDrawnNodes(
-          drawTree() as NodeWithPerson[]
-        );
-    });
+    ctx.strokeStyle = props.theme.getter().gridColor;
+    ctx.lineWidth = 0.5;
 
-    onCleanup((): void => {
-        window.removeEventListener('resize', resizeCanvas);
-    });
-
-    /* Canvas related methods */
-    const drawTree = (): NodeWithPerson[] => {
-        return [] as NodeWithPerson[];
+    for (let x = size; x < width; x += size) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
     }
 
-    const drawNode = (person: Person, x: number, y: number): Node => {
-        context().fillStyle = person.id === rootPerson().id ? '#a0e1ff' : '#f0f0f0';
+    for (let y = size; y < height; y += size) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+  };
 
-        context().fillRect(x, y, settings.nodeWidth, settings.nodeHeight);
-        context().strokeRect(x, y, settings.nodeWidth, settings.nodeHeight);
-        context().fillStyle = 'black';
+  const addConnection = (parentId: number, childId: number): void => {
+    props.edges.setter([...props.edges.getter(), {
+      id: Date.now(),
+      parentId,
+      childId,
+      type: relationshipType()
+    } as TreeEdge]);
+  }
 
-        // TODO: implement customize display settings
-        context().fillText(person.nickName, x + 5, y + 25);
+  const deleteNode = (nodeId: number): void => {
+    props.nodes.setter(props.nodes.getter().filter(n => n.id !== nodeId));
+    props.edges.setter(props.edges.getter().filter(e => e.parentId !== nodeId && e.childId !== nodeId));
+    setSelectedNode(null);
+    setShowContextMenu(false);
+  };
 
-        return {
-            x,
-            y,
-            width: settings.nodeWidth,
-            height: settings.nodeHeight
-        };
-    };
+  const drawNode = (ctx: CanvasRenderingContext2D, node: TreeNode, isSelected = false): void => {
+    const { x, y } = transform(node.x, node.y);
+    const radius = NODE_RADIUS * zoom();
+    const isHighlighted = highlightedNodes().includes(node.id);
+    const isConnecting = connectionStart()?.id === node.id;
 
-    const drawLine = (x1: number, y1: number, x2: number, y2: number, color = 'black'): void => {
-        context().beginPath();
-        context().moveTo(x1, y1);
-        context().lineTo(x2, y2);
-        context().strokeStyle = color;
-        context().stroke();
-    };
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, 2 * Math.PI);
 
-    const drawRootName = (): void => {
-        context().fillStyle = 'black';
-        context().font = 'bold 16px Arial';
+    // Add outline for connecting node
+    if (isConnecting) {
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = props.theme.getter().selectedColor;
+    } else {
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = props.theme.getter().edgeColor;
+    }
 
-        if(rootPerson().firstName && rootPerson().lastName) {
-            const name: string = `${rootPerson().firstName}, ${rootPerson().lastName}`;
-            context().fillText(`Root: ${name}`, 10, 20);
+    ctx.fillStyle = isHighlighted ? props.theme.getter().highlightColor :
+      isSelected ? props.theme.getter().selectedColor :
+        props.theme.getter().nodeColor;
+
+    ctx.fill();
+    ctx.stroke();
+
+    // Draw name
+    ctx.fillStyle = props.theme.getter().textColor;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = `${14 * zoom()}px Arial`;
+    ctx.fillText(node.name, x, y);
+  };
+
+  const drawEdge = (ctx: CanvasRenderingContext2D, edge: TreeEdge, parent: TreeNode, child: TreeNode) => {
+    const p = transform(parent.x, parent.y);
+    const c = transform(child.x, child.y);
+
+    const angle = Math.atan2(c.y - p.y, c.x - p.x);
+
+    // Calculate start and end points on the circumference of the nodes
+    const startX = p.x + Math.cos(angle) * (NODE_RADIUS * zoom());
+    const startY = p.y + Math.sin(angle) * (NODE_RADIUS * zoom());
+    const endX = c.x - Math.cos(angle) * (NODE_RADIUS * zoom());
+    const endY = c.y - Math.sin(angle) * (NODE_RADIUS * zoom());
+
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    ctx.lineTo(endX, endY);
+    ctx.strokeStyle = props.theme.getter().edgeColor;
+
+    // Different line styles for different relationships
+    if (edge.type === 'spouse') {
+      ctx.setLineDash([5, 5]);
+    } else if (edge.type === 'sibling') {
+      ctx.setLineDash([10, 10]);
+    } else {
+      ctx.setLineDash([]);
+    }
+
+    ctx.lineWidth = 2 * zoom();
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Draw relationship type
+    const midX = (startX + endX) / 2;
+    const midY = (startY + endY) / 2;
+    ctx.fillStyle = props.theme.getter().edgeColor;
+    ctx.font = `${12 * zoom()}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(edge.type, midX, midY);
+  };
+
+  const render = (): void => {
+    const ctx: CanvasRenderingContext2D = canvasRef.getContext('2d')!;
+    ctx.clearRect(0, 0, canvasRef.width, canvasRef.height);
+    ctx.fillStyle = props.theme.getter().backgroundColor;
+    ctx.fillRect(0, 0, canvasRef.width, canvasRef.height);
+
+    drawGrid(ctx);
+
+    props.edges.getter().forEach((edge: TreeEdge): void => {
+      const parent: TreeNode | undefined = props.nodes.getter().find((n: TreeNode): boolean => n.id === edge.parentId);
+      const child: TreeNode | undefined = props.nodes.getter().find((n: TreeNode): boolean => n.id === edge.childId);
+      if (parent && child) {
+        drawEdge(ctx, edge, parent, child);
+      }
+    });
+
+    props.nodes.getter().forEach((node: TreeNode): void => {
+      const isSelected = selectedNode()?.id === node.id;
+      const isConnecting = connectionStart()?.id === node.id;
+      drawNode(ctx, node, isSelected || isConnecting);
+    });
+
+    if (isConnecting() && connectionStart()) {
+      const start = connectionStart()!;
+      const startPos = transform(start.x, start.y);
+      const rect = canvasRef.getBoundingClientRect();
+      const mousePos = {
+        x: (lastMousePos().x - rect.left),
+        y: (lastMousePos().y - rect.top)
+      };
+
+      ctx.beginPath();
+      ctx.moveTo(startPos.x, startPos.y);
+      ctx.lineTo(mousePos.x, mousePos.y);
+      ctx.strokeStyle = props.theme.getter().edgeColor;
+      ctx.setLineDash([5, 5]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  };
+
+  const handleCanvasClick = (e: MouseEvent): void => {
+    if (showContextMenu()) {
+      setShowContextMenu(false);
+      return;
+    }
+
+    const rect = canvasRef.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const transformed = inverseTransform(x, y);
+
+    const clickedNode = props.nodes.getter().find(node => {
+      const dx = node.x - transformed.x;
+      const dy = node.y - transformed.y;
+      return Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS;
+    });
+
+    if (clickedNode) {
+      if (isConnecting()) {
+        // If we're in connecting mode and click a different node, create the connection
+        if (connectionStart() && clickedNode.id !== connectionStart()!.id) {
+          addConnection(connectionStart()!.id, clickedNode.id);
+          // Reset connection mode
+          setIsConnecting(false);
+          setConnectionStart(null);
+          setSelectedNode(null);
         }
+      } else {
+        // Start connection mode
+        setIsConnecting(true);
+        setConnectionStart(clickedNode);
+        setSelectedNode(clickedNode);
+      }
+    } else {
+      // Clicked empty space
+      if (!isDragging()) {
+        const name = nameInput.value.trim();
+        if (name) {
+          const pos = snapToGridPosition(x, y);
+          addFamilyMember(name, pos.x, pos.y);
+          nameInput.value = ''; // Clear input after adding
+        }
+      }
+      // Reset connection mode if clicking empty space
+      setIsConnecting(false);
+      setConnectionStart(null);
+      setSelectedNode(null);
+    }
+  };
+
+  const handleContextMenu = (e: MouseEvent): void => {
+    e.preventDefault();
+    const rect = canvasRef.getBoundingClientRect();
+    const transformed = inverseTransform(
+      e.clientX - rect.left,
+      e.clientY - rect.top
+    );
+
+    const clickedNode = props.nodes.getter().find((node: TreeNode) => {
+      const dx = node.x - transformed.x;
+      const dy = node.y - transformed.y;
+      return Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS;
+    });
+
+    if (clickedNode) {
+      setSelectedNode(clickedNode);
     }
 
-    const resizeCanvas = (): void => {
-        console.debug('RESIZE');
+    setContextMenuPos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+    setShowContextMenu(true);
+  };
 
-        // Clear canvas
-        clearCanvas();
+  const handleWheel = (e: WheelEvent): void => {
+    e.preventDefault();
+    const delta = e.deltaY < 0 ? 1.1 : 0.9;
+    setZoom(z => Math.max(0.1, Math.min(5, z * delta)));
+  };
 
-        // Set new dimensions
-        canvas.width = container.clientWidth;
-        canvas.height = container.clientHeight;
+  const handleMouseDown = (e: MouseEvent): void => {
+    const rect = canvasRef.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const transformed = inverseTransform(x, y);
 
-        // Re-Draw tree
-        drawTree();
+    // Right click initiates panning
+    if (e.button === 1 || e.button === 2) {
+      e.preventDefault();
+      setIsPanning(true);
+      setLastPanPoint({ x: e.clientX, y: e.clientY });
+      canvasRef.style.cursor = 'grabbing';
+      return;
     }
 
-    const clearCanvas = (): void => {
-        context().clearRect(0, 0, canvas.width, canvas.height);
-        context().font = '14px Arial';
+    const clickedNode = props.nodes.getter().find(node => {
+      const dx = node.x - transformed.x;
+      const dy = node.y - transformed.y;
+      return Math.sqrt(dx * dx + dy * dy) <= NODE_RADIUS;
+    });
 
-        // Clear drawnNodes array
-        setDrawnNodes(
-          [] as NodeWithPerson[]
-        );
+    if (clickedNode) {
+      setIsDragging(true);
+      setSelectedNode(clickedNode);
+      setDragOffset({
+        x: clickedNode.x - transformed.x,
+        y: clickedNode.y - transformed.y
+      });
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent): void => {
+    setLastMousePos({ x: e.clientX, y: e.clientY });
+
+    if (isPanning()) {
+      const dx = e.clientX - lastPanPoint().x;
+      const dy = e.clientY - lastPanPoint().y;
+
+      setPan(prev => ({
+        x: prev.x + dx / zoom(),
+        y: prev.y + dy / zoom()
+      }));
+
+      setLastPanPoint({ x: e.clientX, y: e.clientY });
+      return;
     }
 
-    /* Tree related methods */
-    const handleCanvasClick = (event: MouseEvent): void => {
-        /* TODO:
-            - Check if node is clicked
-            - If node clicked check if it is the rootPerson or not
-            - If it not the root person then clear the canvas, set the new root person, and re-draw the canvas
-        * */
+    if (isDragging() && selectedNode()) {
+      const rect = canvasRef.getBoundingClientRect();
+      const transformed = inverseTransform(
+        e.clientX - rect.left,
+        e.clientY - rect.top
+      );
 
+      const snapped = snapToGridPosition(
+        transformed.x + dragOffset().x,
+        transformed.y + dragOffset().y
+      );
+
+      props.nodes.setter(props.nodes.getter().map(node => {
+        if (node.id === selectedNode()!.id) {
+          return { ...node, x: snapped.x, y: snapped.y };
+        }
+        return node;
+      }));
+    }
+  };
+
+  const handleMouseUp = (e: MouseEvent): void => {
+    if (e.button === 2) { // Right click
+      setIsConnecting(false);
+      setConnectionStart(null);
+      setSelectedNode(null);
+    }
+    setIsDragging(false);
+    setIsPanning(false);
+    canvasRef.style.cursor = 'default';
+  };
+
+  const handleResize = (entries: any): void => {
+    canvasRef.width = entries[0].target.offsetWidth;
+    canvasRef.height = entries[0].target.offsetHeight;
+
+    setTimeout((): void => {
+      render();
+    }, 0);
+  }
+
+  const searchNodes = (term: string): void => {
+    if (!term) {
+      setHighlightedNodes([]);
+      return;
     }
 
-    const getRelativesOf = (person: Person, relationType: RelationTypes): Person[] => {
-        const relationIds: number[] = props.relations()
-          .filter((r: Relationships): boolean => r.type === relationType && (r.person1Id === person.id || r.person2Id === person.id))
-          .map((r: Relationships): number => r.person1Id === person.id ? r.person2Id : r.person1Id);
+    const results = props.nodes.getter().filter(node =>
+      node.name.toLowerCase().includes(term.toLowerCase()) ||
+      Object.values(node.details).some(value =>
+        value.toString().toLowerCase().includes(term.toLowerCase())
+      )
+    );
 
-        return props.people().filter((p: Person): boolean => relationIds.includes(p.id));
+    setHighlightedNodes(results.map(n => n.id));
+  };
+
+  const saveTree = (): void => {
+    const data = {
+      nodes: props.nodes.getter(),
+      edges: props.edges.getter(),
+      theme: props.theme.getter()
     };
+    const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'family-tree.json';
+    a.click();
+  };
 
-    return <>
-        <div
-          ref={container}
-          class={style.mainBox}
-        >
-            <canvas
-                ref={canvas}
-                onClick={handleCanvasClick}
-            />
-        </div>
-    </>;
+  const loadTree = (event: any): void => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      /* eslint-disable-next-line no-explicit-any */
+      reader.onload = (e: any): void => {
+        const data = JSON.parse(e.target.result);
+        props.nodes.setter(data.nodes);
+        props.edges.setter(data.edges);
+        props.theme.setter(data.theme);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  createEffect((): void => {
+    searchNodes(props.searchTerm());
+  });
+
+  createEffect((): void => {
+    props.nodes.getter();
+    props.edges.getter();
+    zoom();
+    pan();
+    props.theme.getter();
+    render();
+  });
+
+  onMount((): void => {
+    canvasRef.width = canvasRef.getBoundingClientRect().width;
+    canvasRef.height = canvasRef.getBoundingClientRect().height;
+
+    observer = new ResizeObserver(handleResize);
+    observer.observe(canvasRef);
+
+    setTimeout((): void => {
+      render();
+    }, 0);
+  });
+
+  onCleanup((): void => {
+    observer.disconnect();
+  });
+
+  return <>
+    <div class="family-tree" style={{
+      "position":"absolute",
+      "width": "50%",
+      "height": "93%",
+      "top": "7%",
+      "left": "25%",
+    }}>
+      <div class="controls" style={{"margin-bottom": "1rem"}}>
+          <input type={'text'} ref={nameInput} value={'test'}/>
+      </div>
+      
+      <div class="connection-status" style={{
+        "position": "absolute",
+        "top": "10px",
+        "left": "50%",
+        "transform": "translateX(-50%)",
+        "padding": "5px 10px",
+        "background": isConnecting() ? "rgba(33, 150, 243, 0.9)" : "transparent",
+        "color": "white",
+        "border-radius": "4px",
+        "pointer-events": "none",
+        "transition": "background 0.3s"
+      }}>
+        {isConnecting() && "Click another node to create connection"}
+      </div>
+      
+      <div style={{"position": "absolute", "width": "100%", "height": "100%"}}>
+          <canvas
+            ref={canvasRef}
+            onClick={handleCanvasClick}
+            onContextMenu={handleContextMenu}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onWheel={handleWheel}
+            style={{
+              "width": "100%",
+              "height": "100%",
+              "border": "1px solid #ccc",
+              "cursor": isPanning() ? "grabbing" : isDragging() ? "grab" : "default"
+            }}
+          />
+
+          <Show when={showContextMenu()}>
+            <div
+              style={{
+                "position": "absolute",
+                "left": `${contextMenuPos().x}px`,
+                "top": `${contextMenuPos().y}px`,
+                "background": "white",
+                "border": "1px solid #ccc",
+                "padding": "0.5rem",
+                "box-shadow": "2px 2px 5px rgba(0,0,0,0.2)"
+              }}
+            >
+              <Switch>
+                <Match when={selectedNode()}>
+                  <button onClick={(): void => deleteNode(selectedNode()!.id)}>
+                    Delete Node
+                  </button>
+                </Match>
+                <Match when={!selectedNode()}>
+                  <button onClick={(): void => { setShowContextMenu(false); console.log('Clicked!'); }}>
+                    Create new person
+                  </button>
+                </Match>
+              </Switch>
+            </div>
+          </Show>
+      </div>
+    </div>
+  </>;
 }

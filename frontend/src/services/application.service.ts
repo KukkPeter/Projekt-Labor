@@ -14,6 +14,9 @@ export class ApplicationService {
     private trees: BehaviorSubject<Tree[]> = new BehaviorSubject<Tree[]>([] as Tree[]);
     public trees$: Observable<Tree[]> = this.trees.asObservable();
 
+    private currentTree: BehaviorSubject<Tree> = new BehaviorSubject<Tree>({} as Tree);
+    public currentTree$: Observable<Tree> = this.currentTree.asObservable();
+
     private BearerToken?: string;
     public setBearerToken(token?: string): void { this.BearerToken = token; }
 
@@ -45,20 +48,32 @@ export class ApplicationService {
     public createTree(title: string): void {
         // @ts-ignore
         window.trees.createTree(this.BearerToken, title);
-    }
-    public deleteTree(treeId: number): void {
-        // @ts-ignore
-        window.trees.deleteTree(this.BearerToken, treeId);
 
         setTimeout((): void => {
-            // @ts-ignore
-            window.trees.getTrees(this.BearerToken);
+            this.getTrees();
         }, 100);
+    }
+    public deleteTree(treeId: number): void {
+        if(confirm('Are you sure you want to delete this tree?')) {
+            // @ts-ignore
+            window.trees.deleteTree(this.BearerToken, treeId);
+
+            setTimeout((): void => {
+                // @ts-ignore
+                window.trees.getTrees(this.BearerToken);
+            }, 100);
+        }
     }
 
     public openEditor(treeIdentifier: number): void {
-        // TODO: get tree details from database
-        console.debug('###', treeIdentifier);
+        const trees = this.trees.getValue();
+
+        let tree = trees.find((tree: Tree): boolean => tree.id === treeIdentifier);
+        if(tree) {
+            this.currentTree.next(tree);
+        } else {
+            console.error(`Could not find tree with this ID: ${treeIdentifier}\nDebug data: ${trees}`);
+        }
 
         // Redirect to 'Editor' page
         this.setCurrentPage(Pages.Editor);

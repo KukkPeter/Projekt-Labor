@@ -55,7 +55,7 @@
     flex-direction: row;
     flex-wrap: nowrap;
     align-content: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     border: 1px solid #adabad;
     border-radius: 8px;
