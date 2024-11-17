@@ -1,4 +1,4 @@
-import {Component, createSignal, For, Show, JSX} from 'solid-js';
+import {Component, createSignal, For, Show, JSX, onCleanup} from 'solid-js';
 import {Address, Person} from "../canvas/types";
 
 import styles from './newPersonModal.module.css';
@@ -9,57 +9,98 @@ export interface PersonFormProps {
 }
 
 const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
-  const [person, setPerson] = createSignal<Person>({} as Person);
-  const [addresses, setAddresses] = createSignal<Address[]>([] as Address[]);
+  const initialPersonState = (): Person => ({
+    id: '',
+    firstName: '',
+    lastName: '',
+    nickName: '',
+    title: '',
+    gender: null,
+    birthDate: '',
+    deathDate: null,
+    description: '',
+    treeId: props.treeId,
+    createdAt: '',
+    updatedAt: '',
+    addresses: []
+  } as Person);
 
-  const handleInputChange = (field: keyof Person, value: any) => {
-    setPerson({ ...person(), [field]: value });
+  const [person, setPerson] = createSignal<Person>(initialPersonState());
+  const [addressCount, setAddressCount] = createSignal(0);
+
+  const resetForm = () => {
+    setPerson(initialPersonState());
+    setAddressCount(0);
   };
 
-  const handleAddressChange = (index: number, field: keyof Address, value: any) => {
-    const updatedAddresses = addresses().map((address, i) =>
-      i === index ? { ...address, [field]: value } : address
-    );
-    setAddresses(updatedAddresses);
+  onCleanup(() => {
+    resetForm();
+  });
+
+  const handleInputChange = (field: keyof Person, value: any) => {
+    setPerson(prev => ({ ...prev, [field]: value }));
   };
 
   const addAddress = () => {
-    setAddresses([
-      ...addresses(),
-      {
-        personId: person().treeId,
-        addressType: 'residence',
-        country: '',
-        postalCode: '',
-        city: '',
-        street: '',
-        door: ''
-      } as Address
-    ]);
+    setAddressCount(prev => prev + 1);
   };
 
   const removeAddress = (index: number) => {
-    setAddresses(addresses().filter((_, i) => i !== index));
+    // Remove the DOM elements manually
+    const addressGroup = document.getElementById(`address-group-${index}`);
+    if (addressGroup) {
+      addressGroup.remove();
+    }
+    setAddressCount(prev => prev - 1);
   };
 
-  const handleSubmit = (e: Event): void => {
+  const handleSubmit = (e: Event) => {
     e.preventDefault();
+    const form = e.target as HTMLFormElement;
 
-    handleInputChange('id', `NEW-${Date.now()}`);
-    handleInputChange('treeId', props.treeId);
+    // Collect all addresses from the form
+    const addresses: Address[] = [];
+    const addressGroups = form.querySelectorAll('[id^="address-group-"]');
+    
+    addressGroups.forEach((group) => {
+      const addressType = (group.querySelector('[name="addressType"]') as HTMLSelectElement)?.value;
+      const country = (group.querySelector('[name="country"]') as HTMLInputElement)?.value;
+      const postalCode = (group.querySelector('[name="postalCode"]') as HTMLInputElement)?.value;
+      const city = (group.querySelector('[name="city"]') as HTMLInputElement)?.value;
+      const street = (group.querySelector('[name="street"]') as HTMLInputElement)?.value;
+      const door = (group.querySelector('[name="door"]') as HTMLInputElement)?.value;
 
-    setTimeout((): void => {
-      props.onSubmit({ ...person(), addresses: addresses() });
+      addresses.push({
+        id: 0,
+        personId: 0,
+        addressType: addressType as 'residence' | 'birth' | 'death',
+        country,
+        postalCode,
+        city,
+        street,
+        door,
+        createdAt: '',
+        updatedAt: ''
+      });
     });
+
+    const newPerson = {
+      ...person(),
+      id: `NEW-${Date.now()}`,
+      addresses
+    };
+
+    props.onSubmit(newPerson);
+    resetForm();
   };
 
-  // @ts-ignore
   return (
     <form onSubmit={handleSubmit} class={styles.form}>
       <div class={styles['form-group']}>
         <label class={styles.label}>First Name:*</label>
         <input
-          type='text'
+          type="text"
+          value={person().firstName}
           onInput={(e) => handleInputChange('firstName', e.currentTarget.value)}
           class={styles.input}
           required
@@ -69,7 +110,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
       <div class={styles['form-group']}>
         <label class={styles.label}>Last Name:*</label>
         <input
-          type='text'
+          type="text"
+          value={person().lastName}
           onInput={(e) => handleInputChange('lastName', e.currentTarget.value)}
           class={styles.input}
           required
@@ -79,7 +121,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
       <div class={styles['form-group']}>
         <label class={styles.label}>Nickname:</label>
         <input
-          type='text'
+          type="text"
+          value={person().nickName}
           onInput={(e) => handleInputChange('nickName', e.currentTarget.value)}
           class={styles.input}
         />
@@ -88,7 +131,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
       <div class={styles['form-group']}>
         <label class={styles.label}>Title:</label>
         <input
-          type='text'
+          type="text"
+          value={person().title}
           onInput={(e) => handleInputChange('title', e.currentTarget.value)}
           class={styles.input}
         />
@@ -97,20 +141,22 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
       <div class={styles['form-group']}>
         <label class={styles.label}>Gender:*</label>
         <select
+          value={person().gender || ''}
           onChange={(e) => handleInputChange('gender', e.currentTarget.value as 'male' | 'female' | null)}
           class={styles.select}
           required
         >
-          <option value=''>Select</option>
-          <option value='male'>Male</option>
-          <option value='female'>Female</option>
+          <option value="">Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
         </select>
       </div>
 
       <div class={styles['form-group']}>
         <label class={styles.label}>Birth Date:*</label>
         <input
-          type='date'
+          type="date"
+          value={person().birthDate}
           onInput={(e) => handleInputChange('birthDate', e.currentTarget.value)}
           class={styles.input}
           required
@@ -120,7 +166,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
       <div class={styles['form-group']}>
         <label class={styles.label}>Death Date:</label>
         <input
-          type='date'
+          type="date"
+          value={person().deathDate || ''}
           onInput={(e) => handleInputChange('deathDate', e.currentTarget.value)}
           class={styles.input}
         />
@@ -129,6 +176,7 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
       <div class={styles['form-group']}>
         <label class={styles.label}>Description:</label>
         <textarea
+          value={person().description}
           onInput={(e) => handleInputChange('description', e.currentTarget.value)}
           class={styles.textarea}
         />
@@ -136,26 +184,26 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
 
       <fieldset class={styles.fieldset}>
         <legend class={styles.legend}>Addresses</legend>
-        <For each={addresses()}>
-          {(address, index) => (
-            <div id={`address-${index()}`} class={styles['address-group']}>
+        <For each={Array(addressCount()).fill(0)}>
+          {(_, index) => (
+            <div id={`address-group-${index()}`} class={styles['address-group']}>
               <div class={styles['form-group']}>
                 <label class={styles.label}>Address Type:</label>
                 <select
-                  onChange={(e) => handleAddressChange(index(), 'addressType', e.currentTarget.value as 'residence' | 'birth' | 'death')}
+                  name="addressType"
                   class={styles.select}
                 >
-                  <option value='residence'>Residence</option>
-                  <option value='birth'>Birth</option>
-                  <option value='death'>Death</option>
+                  <option value="residence">Residence</option>
+                  <option value="birth">Birth</option>
+                  <option value="death">Death</option>
                 </select>
               </div>
 
               <div class={styles['form-group']}>
                 <label class={styles.label}>Country:</label>
                 <input
-                  type='text'
-                  onInput={(e) => handleAddressChange(index(), 'country', e.currentTarget.value)}
+                  type="text"
+                  name="country"
                   class={styles.input}
                 />
               </div>
@@ -163,8 +211,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
               <div class={styles['form-group']}>
                 <label class={styles.label}>Postal Code:</label>
                 <input
-                  type='text'
-                  onInput={(e) => handleAddressChange(index(), 'postalCode', e.currentTarget.value)}
+                  type="text"
+                  name="postalCode"
                   class={styles.input}
                 />
               </div>
@@ -172,8 +220,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
               <div class={styles['form-group']}>
                 <label class={styles.label}>City:</label>
                 <input
-                  type='text'
-                  onInput={(e) => handleAddressChange(index(), 'city', e.currentTarget.value)}
+                  type="text"
+                  name="city"
                   class={styles.input}
                 />
               </div>
@@ -181,8 +229,8 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
               <div class={styles['form-group']}>
                 <label class={styles.label}>Street:</label>
                 <input
-                  type='text'
-                  onInput={(e) => handleAddressChange(index(), 'street', e.currentTarget.value)}
+                  type="text"
+                  name="street"
                   class={styles.input}
                 />
               </div>
@@ -190,24 +238,30 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
               <div class={styles['form-group']}>
                 <label class={styles.label}>Door:</label>
                 <input
-                  type='text'
-                  onInput={(e) => handleAddressChange(index(), 'door', e.currentTarget.value)}
+                  type="text"
+                  name="door"
                   class={styles.input}
                 />
               </div>
 
-              <button type='button' onClick={() => removeAddress(index())} class={styles['remove-button']}>
+              <button
+                type="button"
+                onClick={() => removeAddress(index())}
+                class={styles['remove-button']}
+              >
                 Remove Address
               </button>
             </div>
           )}
         </For>
-        <button type='button' onClick={addAddress} class={styles['add-button']}>
+        <button type="button" onClick={addAddress} class={styles['add-button']}>
           Add Address
         </button>
       </fieldset>
 
-      <button type='submit' class={styles['submit-button']}>Add new person</button>
+      <button type="submit" class={styles['submit-button']}>
+        Add new person
+      </button>
     </form>
   );
 };
