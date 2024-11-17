@@ -26,8 +26,8 @@ export default function(): JSX.Element {
     const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
 
     const currentTree: Accessor<Tree | undefined> = from(app.currentTree$);
+    const originalPeople: Accessor<Person[] | undefined> = from(app.originalPeople$);
 
-    const [originalPeople, setOriginalPeople] = createSignal([] as Person[]);
     const [people, setPeople] = createSignal([] as Person[]);
     const [selectedPerson, setSelectedPerson] = createSignal<Person | undefined>(undefined);
     const [coordinates, setCoordinates] = createSignal<{x: number; y: number;}>({ x: 0, y: 0});
@@ -50,8 +50,27 @@ export default function(): JSX.Element {
     });
 
     onMount((): void => {
-        // TODO: Load tree data from currentTree object
-        // Also, Make people copy to originalPeople
+        setPeople(originalPeople()!);
+
+        if(typeof currentTree()!.treeData === 'string') {
+            if(JSON.parse(currentTree()!.treeData).nodes) {
+                setNodes(
+                    JSON.parse(currentTree()!.treeData).nodes as TreeNode[]
+                );
+            }
+
+            if(JSON.parse(currentTree()!.treeData).edges){
+                setEdges(
+                    JSON.parse(currentTree()!.treeData).edges as TreeEdge[]
+                );
+            }
+
+            if(JSON.parse(currentTree()!.treeData).theme) {
+                setTheme(
+                    JSON.parse(currentTree()!.treeData).theme as Theme
+                );
+            }
+        }
     });
 
     createEffect((): void => {
@@ -67,19 +86,17 @@ export default function(): JSX.Element {
         }
     });
 
+    const removePerson = (personId: string): void => {
+        const updatedPeople = people().filter(person => person.id !== personId);
+        setPeople(updatedPeople);
+    }
+
     const addNewPerson = (x: number, y: number): void => {
         setCoordinates({x: x, y: y});
         addNewPersonModal.show();
     }
 
     const saveTree = (): void => {
-        let needToDeletePeople: Person[] = [];
-        originalPeople().forEach((person: Person): void => {
-           if(!people().includes(person)) {
-               needToDeletePeople.push(person);
-           }
-        });
-
         let newPeople: Person[] = [];
         people().forEach((person: Person): void => {
            if((person.id as string).startsWith('NEW-')) {
@@ -117,16 +134,34 @@ export default function(): JSX.Element {
             allEdges.push(edge);
         });
 
+        let needToDeletePeople: Person[] = [];
+        originalPeople()!.forEach((person: Person): void => {
+            if(!people().includes(person)) {
+                needToDeletePeople.push(person);
+            }
+        });
+        // TODO: fix saving (needToDeletePeople not working)
+
         const data = {
             nodes: allNodes,
             edges: allEdges,
             theme: theme()
         };
 
-        const stringified: string = JSON.stringify(data);
+        setNodes(allNodes);
+        setEdges(allEdges);
+        setPeople((prev: Person[]): Person[] => {
+            let newPObject: Person[] = prev;
+            for(let i: number = 0; i < newPObject.length; i++) {
+                if((newPObject[i].id as string).startsWith('NEW-')) {
+                    newPObject[i].id = (newPObject[i].id as string).split('NEW-')[1];
+                }
+            }
+            return newPObject;
+        });
 
         app.saveTree(
-          stringified,
+          JSON.stringify(data),
           needToDeletePeople,
           newPeople
         );
@@ -160,6 +195,7 @@ export default function(): JSX.Element {
                 }}
                 searchTerm={searchTerm}
                 addNewPerson={addNewPerson}
+                removePerson={removePerson}
                 selectedNode={{
                     getter: selectedNode,
                     setter: setSelectedNode

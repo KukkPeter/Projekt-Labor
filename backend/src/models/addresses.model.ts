@@ -1,7 +1,7 @@
 export = (sequelize: any, Sequelize: any) => {
   return sequelize.define("addresses", {
     personId: {
-      type: Sequelize.INTEGER
+      type: Sequelize.STRING
     },
     addressType: {
       type: Sequelize.ENUM('residence', 'birth', 'death'),

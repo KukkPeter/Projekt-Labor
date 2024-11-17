@@ -19,6 +19,7 @@ export default function(props: {
   },
   searchTerm: Accessor<string>,
   addNewPerson: (x: number, y: number) => void,
+  removePerson: (personId: string) => void,
   selectedNode: {
     getter: Accessor<TreeNode | null>,
     setter: Setter<TreeNode | null>
@@ -105,6 +106,7 @@ export default function(props: {
   const deleteNode = (nodeId: number): void => {
     props.nodes.setter(props.nodes.getter().filter(n => n.id !== nodeId));
     props.edges.setter(props.edges.getter().filter(e => e.parentId !== nodeId && e.childId !== nodeId));
+    props.removePerson(nodeId.toString());
     props.selectedNode.setter(null);
     setShowContextMenu(false);
   };

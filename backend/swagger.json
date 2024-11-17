@@ -92,6 +92,9 @@
 			},
 			"CreateNewPerson": {
 				"properties": {
+					"id": {
+						"type": "string"
+					},
 					"firstName": {
 						"type": "string"
 					},
@@ -131,6 +134,7 @@
 					}
 				},
 				"required": [
+					"id",
 					"firstName",
 					"lastName",
 					"nickName",
@@ -598,8 +602,7 @@
 						"name": "personId",
 						"required": true,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"type": "string"
 						}
 					}
 				]
@@ -670,8 +673,7 @@
 						"name": "personId",
 						"required": true,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"type": "string"
 						}
 					}
 				]
@@ -778,8 +780,7 @@
 						"name": "personId",
 						"required": true,
 						"schema": {
-							"format": "double",
-							"type": "number"
+							"type": "string"
 						}
 					}
 				],

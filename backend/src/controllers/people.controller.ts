@@ -21,7 +21,7 @@ export class PeopleController extends Controller {
 
     @Get('/details/{personId}')
     @Security('jwt')
-    public async getPerson(@Path() personId: number): Promise<IResponse> {
+    public async getPerson(@Path() personId: string): Promise<IResponse> {
         const person = await PeopleService.getPerson(personId);
 
         return {
@@ -45,7 +45,7 @@ export class PeopleController extends Controller {
 
     @Delete('/{personId}')
     @Security('jwt')
-    public async deletePerson(@Path() personId: number): Promise<IResponse> {
+    public async deletePerson(@Path() personId: string): Promise<IResponse> {
         const personStatus = await PeopleService.deletePerson(personId);
 
         return {

@@ -1,8 +1,8 @@
-import { singleton } from "tsyringe";
+import {singleton} from "tsyringe";
 import {BehaviorSubject, Observable} from "rxjs";
 
-import { Pages } from "../interfaces/pages.interface";
-import { Tree } from "../interfaces/tree.interface";
+import {Pages} from "../interfaces/pages.interface";
+import {Tree} from "../interfaces/tree.interface";
 import {Person} from "../components/canvas/types";
 
 @singleton()
@@ -18,10 +18,22 @@ export class ApplicationService {
     private currentTree: BehaviorSubject<Tree> = new BehaviorSubject<Tree>({} as Tree);
     public currentTree$: Observable<Tree> = this.currentTree.asObservable();
 
+    private originalPeople: BehaviorSubject<Person[]> = new BehaviorSubject<Person[]>([] as Person[]);
+    public originalPeople$: Observable<Person[]> = this.originalPeople.asObservable();
+
     private BearerToken?: string;
     public setBearerToken(token?: string): void { this.BearerToken = token; }
 
     constructor() {
+        /* People */
+        // @ts-ignore
+        window.people.listen((data: any): void => {
+            this.peopleCallback(
+                data.action,
+                data.response
+            );
+        });
+
         /* Trees */
         // @ts-ignore
         window.trees.listen((data: any): void => {
@@ -30,6 +42,35 @@ export class ApplicationService {
                 data.response
             );
         });
+    }
+
+    /* People */
+    private peopleCallback = (action: string, response: any): void => {
+        switch (action) {
+            case 'getPeopleForTree':
+                this.originalPeople.next(response.data as Person[]);
+                break;
+            case 'addPeople':
+                this.getTrees();
+                break;
+            case 'addressAdded':
+                this.getTrees();
+                break;
+            case 'deletePeople':
+                this.getTrees();
+                break;
+            case 'addressDeleted':
+                this.getTrees();
+                break;
+
+            default:
+                break;
+        }
+    }
+    private getPeopleForTree = (treeId: number): void => {
+        // @ts-ignore
+        window.people.getPeopleForTree(this.BearerToken, treeId);
+        console.log(this.BearerToken);
     }
 
     /* Trees */
@@ -71,19 +112,31 @@ export class ApplicationService {
         // @ts-ignore
         window.trees.updateTree(this.BearerToken, this.currentTree.getValue().id, data);
 
-        // TODO: make delete queries to deletePeople and make add queries to addPeople
-    }
-    public openEditor(treeIdentifier: number): void {
-        const trees = this.trees.getValue();
+        if(addPeople.length !== 0) {
+            // @ts-ignore
+            window.people.addPeople(this.BearerToken, addPeople); // Add people to database
+        }
 
-        let tree = trees.find((tree: Tree): boolean => tree.id === treeIdentifier);
+        if(deletePeople.length !== 0) {
+            // @ts-ignore
+            window.people.deletePeople(this.BearerToken, deletePeople); // Remove people from database
+        }
+
+        this.getPeopleForTree(this.currentTree.getValue().id);
+    }
+
+    public openEditor(treeIdentifier: number): void {
+        const trees: Tree[] = this.trees.getValue();
+
+        let tree: Tree | undefined = trees.find((tree: Tree): boolean => tree.id === treeIdentifier);
         if(tree) {
             this.currentTree.next(tree);
+
+            this.getPeopleForTree(treeIdentifier);
+
+            this.setCurrentPage(Pages.Editor);
         } else {
             console.error(`Could not find tree with this ID: ${treeIdentifier}\nDebug data: ${trees}`);
         }
-
-        // Redirect to 'Editor' page
-        this.setCurrentPage(Pages.Editor);
     }
 }

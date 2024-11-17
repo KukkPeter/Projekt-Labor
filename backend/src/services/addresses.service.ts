@@ -30,7 +30,7 @@ class AddressesService {
         }
     }
 
-    async createAddress(personId: number, body: CreateNewAddress): Promise<any> {
+    async createAddress(personId: string, body: CreateNewAddress): Promise<any> {
         try {
             return await db.create({
                 personId: personId,

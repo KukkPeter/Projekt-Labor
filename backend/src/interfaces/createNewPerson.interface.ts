@@ -1,4 +1,5 @@
 export interface CreateNewPerson {
+    id: string;
     firstName: string;
     lastName: string;
     nickName: string;

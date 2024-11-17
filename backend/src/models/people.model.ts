@@ -1,5 +1,10 @@
 export = (sequelize: any, Sequelize: any) => {
   return sequelize.define("people", {
+    id: {
+      type: Sequelize.STRING,
+      allowNull: false,
+      primaryKey: true
+    },
     firstName: {
       type: Sequelize.STRING
     },

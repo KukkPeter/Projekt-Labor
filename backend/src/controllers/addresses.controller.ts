@@ -34,7 +34,7 @@ export class AddressesController extends Controller {
 
     @Post('/create/{personId}')
     @Security('jwt')
-    public async createNewAddress(@Path() personId: number, @Body() body: CreateNewAddress): Promise<IResponse> {
+    public async createNewAddress(@Path() personId: string, @Body() body: CreateNewAddress): Promise<IResponse> {
         const address = await AddressesService.createAddress(personId, body);
 
         return {

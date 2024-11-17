@@ -90,7 +90,31 @@ contextBridge.exposeInMainWorld(
     }
 );
 
-// TODO: make People and Address endpoints & Services
+contextBridge.exposeInMainWorld(
+  'people', {
+    getPeopleForTree: (bearer_token: string, tree_identifier: number) => {
+      ipcRenderer.send('people:getPeopleForTree', {
+        token: bearer_token,
+        treeId: tree_identifier,
+      });
+    },
+    addPeople: (bearer_token: string, people: any) => {
+      ipcRenderer.send('people:addPeople', {
+        token: bearer_token,
+        people: people,
+      });
+    },
+    deletePeople: (bearer_token: string, people: any) => {
+      ipcRenderer.send('people:deletePeople', {
+        token: bearer_token,
+        people: people,
+      });
+    },
+    listen: (callback: RendererOnCallback): RemoveListener => {
+        return receiveMessage('people', callback);
+    }
+  }
+);
 
 // You can also expose variables, not just functions
 contextBridge.exposeInMainWorld('electronAPI', {

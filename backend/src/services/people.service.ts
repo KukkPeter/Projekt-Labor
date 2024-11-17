@@ -18,22 +18,6 @@ class PeopleService {
                     {
                         model: db_addresses,
                         as: 'addresses'
-                    },
-                    {
-                        model: db,
-                        as: 'personOne',
-                        through: {
-                            model: db_relationships,
-                            attributes: ['type']
-                        }
-                    },
-                    {
-                        model: db,
-                        as: 'personTwo',
-                        through: {
-                            model: db_relationships,
-                            attributes: ['type']
-                        }
                     }
                 ]
             });
@@ -42,7 +26,7 @@ class PeopleService {
         }
     }
 
-    async getPerson(personId: number): Promise<any> {
+    async getPerson(personId: string): Promise<any> {
         try {
             return await db.findOne({
                 where: {
@@ -52,22 +36,6 @@ class PeopleService {
                     {
                         model: db_addresses,
                         as: 'addresses'
-                    },
-                    {
-                        model: db,
-                        as: 'personOne',
-                        through: {
-                            model: db_relationships,
-                            attributes: ['type']
-                        }
-                    },
-                    {
-                        model: db,
-                        as: 'personTwo',
-                        through: {
-                            model: db_relationships,
-                            attributes: ['type']
-                        }
                     }
                 ]
             });
@@ -79,6 +47,7 @@ class PeopleService {
     async createPerson(body: CreateNewPerson): Promise<any> {
         try {
             return await db.create({
+                id: body.id,
                 firstName: body.firstName,
                 lastName: body.lastName,
                 nickName: body.nickName,
@@ -94,7 +63,7 @@ class PeopleService {
         }
     }
 
-    async deletePerson(personId: number): Promise<any> {
+    async deletePerson(personId: string): Promise<any> {
         try {
             const person = await db.findOne({
                 where: {

@@ -70,6 +70,7 @@ const models: TsoaRoute.Models = {
     "CreateNewPerson": {
         "dataType": "refObject",
         "properties": {
+            "id": {"dataType":"string","required":true},
             "firstName": {"dataType":"string","required":true},
             "lastName": {"dataType":"string","required":true},
             "nickName": {"dataType":"string","required":true},
@@ -462,7 +463,7 @@ export function RegisterRoutes(app: Router) {
 
             async function PeopleController_getPerson(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    personId: {"in":"path","name":"personId","required":true,"dataType":"double"},
+                    personId: {"in":"path","name":"personId","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -524,7 +525,7 @@ export function RegisterRoutes(app: Router) {
 
             async function PeopleController_deletePerson(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    personId: {"in":"path","name":"personId","required":true,"dataType":"double"},
+                    personId: {"in":"path","name":"personId","required":true,"dataType":"string"},
             };
 
             // WARNING: This file was auto-generated with tsoa. Please do not modify it. Re-run tsoa to re-generate this file: https://github.com/lukeautry/tsoa
@@ -617,7 +618,7 @@ export function RegisterRoutes(app: Router) {
 
             async function AddressesController_createNewAddress(request: ExRequest, response: ExResponse, next: any) {
             const args: Record<string, TsoaRoute.ParameterSchema> = {
-                    personId: {"in":"path","name":"personId","required":true,"dataType":"double"},
+                    personId: {"in":"path","name":"personId","required":true,"dataType":"string"},
                     body: {"in":"body","name":"body","required":true,"ref":"CreateNewAddress"},
             };
 
