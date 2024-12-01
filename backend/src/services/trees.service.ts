@@ -45,7 +45,7 @@ class TreesService {
                 return await db.create({
                     title: body.title,
                     ownerId: userId,
-                    treeData: {}
+                    treeData: "{}"
                 });
             } else {
                 throw new Error('A tree with this title already exists!');

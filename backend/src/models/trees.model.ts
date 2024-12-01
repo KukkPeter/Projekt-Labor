@@ -4,7 +4,7 @@ export = (sequelize: any, Sequelize: any) => {
       type: Sequelize.STRING
     },
     treeData: {
-      type: Sequelize.JSON
+      type: Sequelize.TEXT('long')
     },
     ownerId: {
       type: Sequelize.INTEGER
