@@ -70,7 +70,6 @@ export class ApplicationService {
     private getPeopleForTree = (treeId: number): void => {
         // @ts-ignore
         window.people.getPeopleForTree(this.BearerToken, treeId);
-        console.log(this.BearerToken);
     }
 
     /* Trees */
@@ -121,8 +120,6 @@ export class ApplicationService {
             // @ts-ignore
             window.people.deletePeople(this.BearerToken, deletePeople); // Remove people from database
         }
-
-        this.getPeopleForTree(this.currentTree.getValue().id);
     }
 
     public openEditor(treeIdentifier: number): void {

@@ -3,7 +3,6 @@ import { CreateNewPerson } from "../interfaces/createNewPerson.interface";
 
 const db = require('../models').people;
 const db_addresses = require('../models').addresses;
-const db_relationships = require('../models').relationships;
 
 class PeopleService {
     constructor() {}

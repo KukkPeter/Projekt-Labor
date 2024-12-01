@@ -441,6 +441,7 @@ export default function(props: {
       "height": "93%",
       "top": "7%",
       "left": "25%",
+      "overflow": "hidden"
     }}>
       <div class="connection-status" style={{
         "position": "absolute",

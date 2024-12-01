@@ -29,6 +29,8 @@
     justify-content: flex-start;
     flex-wrap: nowrap;
     flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .customizeBar .optionsMenu .title {

@@ -28,24 +28,24 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
   const [person, setPerson] = createSignal<Person>(initialPersonState());
   const [addressCount, setAddressCount] = createSignal(0);
 
-  const resetForm = () => {
+  const resetForm = (): void => {
     setPerson(initialPersonState());
     setAddressCount(0);
   };
 
-  onCleanup(() => {
+  onCleanup((): void => {
     resetForm();
   });
 
-  const handleInputChange = (field: keyof Person, value: any) => {
+  const handleInputChange = (field: keyof Person, value: any): void => {
     setPerson(prev => ({ ...prev, [field]: value }));
   };
 
-  const addAddress = () => {
+  const addAddress = (): void => {
     setAddressCount(prev => prev + 1);
   };
 
-  const removeAddress = (index: number) => {
+  const removeAddress = (index: number): void => {
     // Remove the DOM elements manually
     const addressGroup = document.getElementById(`address-group-${index}`);
     if (addressGroup) {
@@ -54,7 +54,7 @@ const NewPersonModal: Component<PersonFormProps> = (props): JSX.Element => {
     setAddressCount(prev => prev - 1);
   };
 
-  const handleSubmit = (e: Event) => {
+  const handleSubmit = (e: Event): void => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
 

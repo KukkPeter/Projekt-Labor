@@ -50,7 +50,9 @@ export default function(): JSX.Element {
     });
 
     onMount((): void => {
-        setPeople(originalPeople()!);
+        setTimeout((): void =>{
+            setPeople(originalPeople()!);
+        }, 500);
 
         if(typeof currentTree()!.treeData === 'string') {
             if(JSON.parse(currentTree()!.treeData).nodes) {
@@ -123,12 +125,16 @@ export default function(): JSX.Element {
         edges().forEach((edge: TreeEdge): void => {
             let newEdge: TreeEdge = edge;
 
+            if(edge.id.startsWith('NEW-')) {
+                newEdge.id = edge.id.split('NEW-')[1];
+            }
+
             if(edge.parentId.startsWith('NEW-')) {
                 newEdge.parentId = edge.parentId.split('NEW-')[1];
             }
 
             if(edge.childId.startsWith('NEW-')) {
-                newEdge.childId = edge.childId.split('NEW-')[0];
+                newEdge.childId = edge.childId.split('NEW-')[1];
             }
 
             allEdges.push(edge);
@@ -248,7 +254,7 @@ export default function(): JSX.Element {
                     ]);
 
                     setNodes([
-                      ...nodes(),
+                        ...nodes(),
                         {
                             id: person.id,
                             name: `${person.firstName}`,
