@@ -54,24 +54,12 @@ export default function(): JSX.Element {
             setPeople(originalPeople()!);
         }, 500);
 
-        if(typeof currentTree()!.treeData === 'string') {
-            if(JSON.parse(currentTree()!.treeData).nodes) {
-                setNodes(
-                    JSON.parse(currentTree()!.treeData).nodes as TreeNode[]
-                );
-            }
+        if (typeof currentTree()!.treeData === 'string') {
+            const parsedTreeData = JSON.parse(currentTree()!.treeData);
 
-            if(JSON.parse(currentTree()!.treeData).edges){
-                setEdges(
-                    JSON.parse(currentTree()!.treeData).edges as TreeEdge[]
-                );
-            }
-
-            if(JSON.parse(currentTree()!.treeData).theme) {
-                setTheme(
-                    JSON.parse(currentTree()!.treeData).theme as Theme
-                );
-            }
+            parsedTreeData.nodes && setNodes(parsedTreeData.nodes as TreeNode[]);
+            parsedTreeData.edges && setEdges(parsedTreeData.edges as TreeEdge[]);
+            parsedTreeData.theme && setTheme(parsedTreeData.theme as Theme);
         }
     });
 
@@ -146,7 +134,6 @@ export default function(): JSX.Element {
                 needToDeletePeople.push(person);
             }
         });
-        // TODO: fix saving (needToDeletePeople not working)
 
         const data = {
             nodes: allNodes,

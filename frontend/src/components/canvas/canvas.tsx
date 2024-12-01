@@ -2,6 +2,8 @@ import { createSignal, onMount, createEffect, Show, JSX, onCleanup, Accessor, Se
 import { TreeNode, TreeEdge, Position, Theme, RelationType } from './types';
 import { RelationTypeSelector } from '../relationTypeModal/relationTypeSelector';
 
+import style from './canvas.module.css';
+
 export default function(props: {
   snapToGrid: Accessor<boolean>,
   gridSize: Accessor<number>,
@@ -447,30 +449,14 @@ export default function(props: {
   });
 
   return <>
-    <div class="family-tree" style={{
-      "position":"absolute",
-      "width": "50%",
-      "height": "93%",
-      "top": "7%",
-      "left": "25%",
-      "overflow": "hidden"
-    }}>
-      <div class="connection-status" style={{
-        "position": "absolute",
-        "top": "10px",
-        "left": "50%",
-        "transform": "translateX(-50%)",
-        "padding": "5px 10px",
+    <div class={style['family-tree']}>
+      <div class={style['connection-status']} style={{
         "background": isConnecting() ? "rgba(33, 150, 243, 0.9)" : "transparent",
-        "color": "white",
-        "border-radius": "4px",
-        "pointer-events": "none",
-        "transition": "background 0.3s"
       }}>
         {isConnecting() && "Click another node to create connection"}
       </div>
       
-      <div style={{"position": "absolute", "width": "100%", "height": "100%"}}>
+      <div class={style['canvas-container']}>
           <canvas
             ref={canvasRef}
             onClick={handleCanvasClick}
@@ -480,34 +466,28 @@ export default function(props: {
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
             onWheel={handleWheel}
+            class={style['canvas']}
             style={{
-              "width": "100%",
-              "height": "100%",
-              "border": "1px solid #ccc",
               "cursor": isPanning() ? "grabbing" : isDragging() ? "grab" : "default"
             }}
           />
 
           <Show when={showContextMenu()}>
-            <div
+            <div class={style['contextMenu']}
               style={{
-                "position": "absolute",
                 "left": `${contextMenuPos().x}px`,
-                "top": `${contextMenuPos().y}px`,
-                "background": "white",
-                "border": "1px solid #ccc",
-                "padding": "0.5rem",
-                "box-shadow": "2px 2px 5px rgba(0,0,0,0.2)",
-                "min-width": "200px"
+                "top": `${contextMenuPos().y}px`
               }}
             >
               <Switch>
                 <Match when={props.selectedNode.getter()}>
-                  <div style={{ "border-bottom": "1px solid #ccc", "padding-bottom": "8px", "margin-bottom": "8px" }}>
-                    <button onClick={(): void => {
-                      setShowContextMenu(false);
-                      setShowRelationTypeSelector(true);
-                    }}>
+                  <div class={style['contextContainer']}>
+                    <button
+                      onClick={(): void => {
+                        setShowContextMenu(false);
+                        setShowRelationTypeSelector(true);
+                      }}
+                    >
                       Add connection
                     </button>
                     <button onClick={(): void => deleteNode(props.selectedNode.getter()!.id)}>
@@ -515,16 +495,11 @@ export default function(props: {
                     </button>
                   </div>
 
-                  <div style={{ "font-size": "14px" }}>
-                    <p style={{ "margin": "4px 0", "font-weight": "bold" }}>Connections:</p>
+                  <div class={style['relationsContainer']}>
+                    <p>Connections:</p>
                     <For each={getNodeConnections(props.selectedNode.getter()!.id)}>
                       {(edge) => (
-                        <div style={{
-                          "display": "flex",
-                          "justify-content": "space-between",
-                          "align-items": "center",
-                          "padding": "4px 0"
-                        }}>
+                        <div class={style['container']}>
                           <span>{getRelationshipDescription(edge, props.selectedNode.getter()!.id)}</span>
                           <button 
                             onClick={() => {
@@ -532,13 +507,6 @@ export default function(props: {
                                 deleteConnection(edge.id);
                                 setShowContextMenu(false);
                               }
-                            }}
-                            style={{
-                              "background": "none",
-                              "border": "none",
-                              "color": "red",
-                              "cursor": "pointer",
-                              "padding": "2px 6px"
                             }}
                           >
                             ×
@@ -549,7 +517,7 @@ export default function(props: {
                   </div>
                 </Match>
                 <Match when={!props.selectedNode.getter()}>
-                  <button onClick={(): void => {
+                  <button class={style['newPersonButton']} onClick={(): void => {
                     setShowContextMenu(false);
                     props.addNewPerson(contextMenuPos().x, contextMenuPos().y);
                   }}>
