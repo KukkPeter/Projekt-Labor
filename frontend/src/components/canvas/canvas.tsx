@@ -107,13 +107,25 @@ export default function(props: {
     const otherNode = props.nodes.getter().find(n => 
       n.id === (edge.parentId === nodeId ? edge.childId : edge.parentId)
     );
-    
-    if (edge.parentId === nodeId) {
-      return `${edge.type} of ${otherNode?.name}`;
-    } else {
-      return `has ${edge.type} ${otherNode?.name}`;
+
+    if (!otherNode) return '';
+
+    switch (edge.type) {
+        case 'parent':
+            return edge.parentId === nodeId 
+                ? `parent of ${otherNode.name}`
+                : `child of ${otherNode.name}`;
+            
+        case 'spouse':
+            return `married to ${otherNode.name}`;
+            
+        case 'sibling':
+            return `sibling of ${otherNode.name}`;
+            
+        default:
+            return `connected to ${otherNode.name}`;
     }
-  };
+};
 
   const addConnection = (parentId: number, childId: number, type: RelationType): void => {
     props.edges.setter([...props.edges.getter(), {
