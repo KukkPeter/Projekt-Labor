@@ -1,6 +1,6 @@
-import { createSignal, onMount, createEffect, Show, JSX, onCleanup, Accessor, Setter, Switch, Match } from 'solid-js';
-
+import { createSignal, onMount, createEffect, Show, JSX, onCleanup, Accessor, Setter, Switch, Match, For } from 'solid-js';
 import { TreeNode, TreeEdge, Position, Theme, RelationType } from './types';
+import { RelationTypeSelector } from '../relationTypeModal/relationTypeSelector';
 
 export default function(props: {
   snapToGrid: Accessor<boolean>,
@@ -37,6 +37,7 @@ export default function(props: {
   const [contextMenuPos, setContextMenuPos] = createSignal<Position>({ x: 0, y: 0 });
   
   const [relationshipType, setRelationshipType] = createSignal<RelationType>('parent');
+  const [showRelationTypeSelector, setShowRelationTypeSelector] = createSignal<boolean>(false);
 
   const [highlightedNodes, setHighlightedNodes] = createSignal<number[]>([]);
   
@@ -92,15 +93,36 @@ export default function(props: {
     }
   };
 
-  const addConnection = (parentId: number, childId: number): void => {
-    // TODO: set relationship type with modal
+  const getNodeConnections = (nodeId: number): TreeEdge[] => {
+    return props.edges.getter().filter(edge => 
+      edge.parentId === nodeId || edge.childId === nodeId
+    );
+  };
+
+  const deleteConnection = (edgeId: string): void => {
+    props.edges.setter(props.edges.getter().filter(edge => edge.id !== edgeId));
+  };
+
+  const getRelationshipDescription = (edge: TreeEdge, nodeId: number): string => {
+    const otherNode = props.nodes.getter().find(n => 
+      n.id === (edge.parentId === nodeId ? edge.childId : edge.parentId)
+    );
+    
+    if (edge.parentId === nodeId) {
+      return `${edge.type} of ${otherNode?.name}`;
+    } else {
+      return `has ${edge.type} ${otherNode?.name}`;
+    }
+  };
+
+  const addConnection = (parentId: number, childId: number, type: RelationType): void => {
     props.edges.setter([...props.edges.getter(), {
       id: `NEW-${Date.now()}`,
       parentId: parentId,
       childId: childId,
-      type: relationshipType()
+      type: type
     } as TreeEdge]);
-  }
+  };
 
   const deleteNode = (nodeId: number): void => {
     props.nodes.setter(props.nodes.getter().filter(n => n.id !== nodeId));
@@ -118,7 +140,6 @@ export default function(props: {
     ctx.beginPath();
     ctx.arc(x, y, radius, 0, 2 * Math.PI);
 
-    // Add outline for connecting node
     if (isConnecting) {
       ctx.lineWidth = 3;
       ctx.strokeStyle = props.theme.getter().selectedColor;
@@ -134,7 +155,6 @@ export default function(props: {
     ctx.fill();
     ctx.stroke();
 
-    // Draw name
     ctx.fillStyle = props.theme.getter().textColor;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -148,7 +168,6 @@ export default function(props: {
 
     const angle = Math.atan2(c.y - p.y, c.x - p.x);
 
-    // Calculate start and end points on the circumference of the nodes
     const startX = p.x + Math.cos(angle) * (NODE_RADIUS * zoom());
     const startY = p.y + Math.sin(angle) * (NODE_RADIUS * zoom());
     const endX = c.x - Math.cos(angle) * (NODE_RADIUS * zoom());
@@ -159,7 +178,6 @@ export default function(props: {
     ctx.lineTo(endX, endY);
     ctx.strokeStyle = props.theme.getter().edgeColor;
 
-    // Different line styles for different relationships
     if (edge.type === 'spouse') {
       ctx.setLineDash([5, 5]);
     } else if (edge.type === 'sibling') {
@@ -172,7 +190,6 @@ export default function(props: {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Draw relationship type
     const midX = (startX + endX) / 2;
     const midY = (startY + endY) / 2;
     ctx.fillStyle = props.theme.getter().edgeColor;
@@ -242,17 +259,16 @@ export default function(props: {
 
     if (clickedNode) {
       if (isConnecting()) {
-        // If we're in connecting mode and click a different node, create the connection
         if (connectionStart() && clickedNode.id !== connectionStart()!.id) {
-          addConnection(connectionStart()!.id, clickedNode.id);
-          // Reset connection mode
+          addConnection(connectionStart()!.id, clickedNode.id, relationshipType());
           setIsConnecting(false);
           setConnectionStart(null);
           props.selectedNode.setter(null);
         }
+      } else {
+        props.selectedNode.setter(clickedNode);
       }
     } else {
-      // Reset connection mode if clicking empty space
       setIsConnecting(false);
       setConnectionStart(null);
       props.selectedNode.setter(null);
@@ -293,7 +309,6 @@ export default function(props: {
     const y = e.clientY - rect.top;
     const transformed = inverseTransform(x, y);
 
-    // Right click initiates panning
     if (e.button === 1 || e.button === 2) {
       e.preventDefault();
       setIsPanning(true);
@@ -356,7 +371,7 @@ export default function(props: {
   };
 
   const handleMouseUp = (e: MouseEvent): void => {
-    if (e.button === 2) { // Right click
+    if (e.button === 2) {
       setIsConnecting(false);
       setConnectionStart(null);
       props.selectedNode.setter(null);
@@ -373,7 +388,7 @@ export default function(props: {
     setTimeout((): void => {
       render();
     }, 0);
-  }
+  };
 
   const searchNodes = (term: string): void => {
     if (!term) {
@@ -386,21 +401,6 @@ export default function(props: {
     );
 
     setHighlightedNodes(results.map(n => n.id));
-  };
-
-  const loadTree = (event: any): void => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      /* eslint-disable-next-line no-explicit-any */
-      reader.onload = (e: any): void => {
-        const data = JSON.parse(e.target.result);
-        props.nodes.setter(data.nodes);
-        props.edges.setter(data.edges);
-        props.theme.setter(data.theme);
-      };
-      reader.readAsText(file);
-    }
   };
 
   createEffect((): void => {
@@ -482,21 +482,56 @@ export default function(props: {
                 "background": "white",
                 "border": "1px solid #ccc",
                 "padding": "0.5rem",
-                "box-shadow": "2px 2px 5px rgba(0,0,0,0.2)"
+                "box-shadow": "2px 2px 5px rgba(0,0,0,0.2)",
+                "min-width": "200px"
               }}
             >
               <Switch>
                 <Match when={props.selectedNode.getter()}>
-                  <button onClick={(): void => {
-                    setShowContextMenu(false);
-                    setIsConnecting(true);
-                    setConnectionStart(props.selectedNode.getter());
-                  }}>
-                    Add connection
-                  </button>
-                  <button onClick={(): void => deleteNode(props.selectedNode.getter()!.id)}>
-                    Delete Node
-                  </button>
+                  <div style={{ "border-bottom": "1px solid #ccc", "padding-bottom": "8px", "margin-bottom": "8px" }}>
+                    <button onClick={(): void => {
+                      setShowContextMenu(false);
+                      setShowRelationTypeSelector(true);
+                    }}>
+                      Add connection
+                    </button>
+                    <button onClick={(): void => deleteNode(props.selectedNode.getter()!.id)}>
+                      Delete Node
+                    </button>
+                  </div>
+
+                  <div style={{ "font-size": "14px" }}>
+                    <p style={{ "margin": "4px 0", "font-weight": "bold" }}>Connections:</p>
+                    <For each={getNodeConnections(props.selectedNode.getter()!.id)}>
+                      {(edge) => (
+                        <div style={{
+                          "display": "flex",
+                          "justify-content": "space-between",
+                          "align-items": "center",
+                          "padding": "4px 0"
+                        }}>
+                          <span>{getRelationshipDescription(edge, props.selectedNode.getter()!.id)}</span>
+                          <button 
+                            onClick={() => {
+                              if(confirm('Are you sure you want to delete this connection?')) {
+                                deleteConnection(edge.id);
+                                setShowContextMenu(false);
+                              }
+                            }}
+                            style={{
+                              "background": "none",
+                              "border": "none",
+                              "color": "red",
+                              "cursor": "pointer",
+                              "padding": "2px 6px"
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      )}
+                    </For>
+                  </div>
                 </Match>
                 <Match when={!props.selectedNode.getter()}>
                   <button onClick={(): void => {
@@ -508,6 +543,20 @@ export default function(props: {
                 </Match>
               </Switch>
             </div>
+          </Show>
+
+          <Show when={showRelationTypeSelector()}>
+            <RelationTypeSelector
+              onSelect={(type) => {
+                setRelationshipType(type);
+                setIsConnecting(true);
+                setConnectionStart(props.selectedNode.getter());
+                setShowRelationTypeSelector(false);
+              }}
+              onCancel={() => {
+                setShowRelationTypeSelector(false);
+              }}
+            />
           </Show>
       </div>
     </div>
