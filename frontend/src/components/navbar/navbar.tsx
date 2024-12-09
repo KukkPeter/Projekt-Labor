@@ -15,7 +15,8 @@ import {Person} from "../canvas/types";
 
 export default function(props: {
     page: Pages.Home | Pages.Editor,
-    selectedPerson?: Person
+    selectedPerson?: Person,
+    isOpen: boolean
 }): JSX.Element {
   let createNewTreeModal!: ModalRootElement;
   let createNewTreeNameInput!: HTMLInputElement;
@@ -36,7 +37,7 @@ export default function(props: {
   }
 
   return <>
-    <div id='navbar' class={style.navbar}>
+    <div id='navbar' class={style.navbar} style={props.isOpen === undefined ? 'left: 0' : (props.isOpen ? 'left: 0' : 'left: -25%')}>
       <div class={style.profileSection}>
         <div class={style.profile}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">

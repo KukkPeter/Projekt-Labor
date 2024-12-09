@@ -7,6 +7,21 @@
     overflow: hidden;
 }
 
+.family-tree.leftHidden {
+    width: 75%;
+    left: 0;
+}
+
+.family-tree.rightHidden {
+    width: 75%;
+    left: 25%;
+}
+
+.family-tree.bothHidden {
+    width: 100%;
+    left: 0;
+}
+
 .family-tree .connection-status {
     position: absolute;
     top: 10px;

@@ -1,7 +1,11 @@
 import {
-    Accessor, createEffect,
-    createSignal, from,
-    JSX, onMount, useContext
+    Accessor,
+    createEffect,
+    createSignal,
+    from,
+    JSX,
+    onMount,
+    useContext
 } from "solid-js";
 
 import style from './editor.module.css';
@@ -12,13 +16,14 @@ import { ApplicationService } from "../../services/application.service";
 import Navbar from "../../components/navbar/navbar";
 import CustomizeBar from "../../components/customizeBar/customizeBar";
 import Canvas from "../../components/canvas/canvas";
+import NewPersonModal from "../../components/newPersonModal/newPersonModal";
+import TitleBox from "../../components/titleBox/titleBox";
+import { Modal } from "../../components/modal/modal";
 
 import { Pages } from "../../interfaces/pages.interface";
-import {Person, Theme, TreeEdge, TreeNode} from "../../components/canvas/types";
+import { Person, Theme, TreeEdge, TreeNode } from "../../components/canvas/types";
 import { Tree } from "../../interfaces/tree.interface";
-import {Modal} from "../../components/modal/modal";
-import {ModalRootElement} from "../../components/modal/modal.types";
-import NewPersonModal from "../../components/newPersonModal/newPersonModal";
+import { ModalRootElement } from "../../components/modal/modal.types";
 
 export default function(): JSX.Element {
     let addNewPersonModal!: ModalRootElement;
@@ -48,6 +53,10 @@ export default function(): JSX.Element {
         textColor: '#ffffff',
         gridColor: '#f0f0f0'
     });
+
+    // Left, Right panel signals
+    const [leftPanel, setLeftPanel] = createSignal(true);
+    const [rightPanel, setRightPanel] = createSignal(true);
 
     onMount((): void => {
         setTimeout((): void =>{
@@ -163,15 +172,29 @@ export default function(): JSX.Element {
     return <>
         <div id='editor' class={style.editor}>
             {/* Left Panel */}
-            <Navbar page={Pages.Editor} selectedPerson={selectedPerson()}/>
+            <Navbar
+              page={Pages.Editor}
+              selectedPerson={selectedPerson()}
+              isOpen={leftPanel()}
+            />
 
             {/* Title Bar */}
-            <div class={style.titleBox}>
-                <h1>{currentTree()?.title}</h1>
-            </div>
+            <TitleBox
+              title={currentTree()?.title!}
+              left={{
+                  getter: leftPanel,
+                  setter: setLeftPanel
+              }}
+              right={{
+                  getter: rightPanel,
+                  setter: setRightPanel
+              }}
+            />
 
             {/* Main */}
             <Canvas
+                isLeftOpen={leftPanel()}
+                isRightOpen={rightPanel()}
                 nodes={{
                     getter: nodes,
                     setter: setNodes
@@ -214,6 +237,7 @@ export default function(): JSX.Element {
                     setter: setSearchTerm
                 }}
                 saveTree={saveTree}
+                isOpen={rightPanel()}
             />
 
             {/* Modals */}

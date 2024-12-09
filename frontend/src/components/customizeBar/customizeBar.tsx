@@ -23,7 +23,8 @@ export default function(props: {
     getter: Accessor<string>,
     setter: Setter<string>
   },
-  saveTree: () => void
+  saveTree: () => void,
+  isOpen: boolean
 }): JSX.Element {
   const app: ApplicationService = useContext(DIContextProvider)!.resolve(ApplicationService);
 
@@ -40,7 +41,7 @@ export default function(props: {
   }
 
   return <>
-    <div class={style.customizeBar}>
+    <div class={style.customizeBar} style={props.isOpen === undefined ? 'right: 0' : (props.isOpen ? 'right: 0' : 'right: -25%')}>
       <div class={style.optionsMenu}>
         <div class={style.title}>
           <h2>Customize display</h2>

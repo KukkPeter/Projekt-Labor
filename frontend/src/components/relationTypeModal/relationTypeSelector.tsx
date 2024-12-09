@@ -52,7 +52,6 @@ export const RelationTypeSelector: Component<RelationTypeSelectorProps> = (props
             class={styles.select}
           >
             <option value="parent">Parent</option>
-            <option value="child">Child</option>
             <option value="spouse">Spouse</option>
             <option value="sibling">Sibling</option>
           </select>

@@ -5,6 +5,8 @@ import { RelationTypeSelector } from '../relationTypeModal/relationTypeSelector'
 import style from './canvas.module.css';
 
 export default function(props: {
+  isRightOpen: boolean,
+  isLeftOpen: boolean,
   snapToGrid: Accessor<boolean>,
   gridSize: Accessor<number>,
   theme: {
@@ -448,8 +450,18 @@ export default function(props: {
     observer.disconnect();
   });
 
+  const getHiddenStyle = () => {
+    if (!props.isRightOpen && !props.isLeftOpen) return style.bothHidden;
+    if (!props.isRightOpen && props.isLeftOpen) return style.rightHidden;
+    if (props.isRightOpen && !props.isLeftOpen) return style.leftHidden;
+    return '';
+  };
+
   return <>
-    <div class={style['family-tree']}>
+    <div class={`
+      ${style['family-tree']}
+      ${getHiddenStyle()}
+    `}>
       <div class={style['connection-status']} style={{
         "background": isConnecting() ? "rgba(33, 150, 243, 0.9)" : "transparent",
       }}>

@@ -14,8 +14,10 @@
     align-items: center;
 
     background: white;
-    z-index: 1;
+    z-index: 11;
     box-shadow: 0 0 10px #00000073;
+
+    transition: 0.2s;
 }
 
 /* Profil Menü + Név + Kijelentkezés gomb*/
