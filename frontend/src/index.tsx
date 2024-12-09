@@ -9,6 +9,7 @@ import { AuthService } from './services/auth.service';
 import App from './components/app/app';
 
 import './index.css';
+import {ApplicationService} from "./services/application.service";
 
 const root = document.getElementById('root');
 
@@ -20,7 +21,8 @@ if (!(root instanceof HTMLElement)) {
 
 const appContainer = container.createChildContainer();
 
-appContainer.registerSingleton(AuthService); // AuthService auth = new AuthService();
+appContainer.registerSingleton(AuthService);
+appContainer.registerSingleton(ApplicationService);
 
 render(() => <>
   <DIContextProvider.Provider value={appContainer}>

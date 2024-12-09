@@ -19,6 +19,8 @@
     align-items: center;
     
     box-shadow: rgba(0, 0, 0, 0.45) 0px 20px 20px -25px;
+
+    background: white;
 }
 
 .folder .topSection h3 {
@@ -61,6 +63,8 @@
     align-content: center;
     align-items: center;
     justify-content: space-between;
+
+    background: white;
 }
 
 .folder .bottomSection .scrollView .card h2 {

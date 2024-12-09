@@ -1,0 +1,23 @@
+.container {
+  padding: 20px;
+}
+
+.form-group {
+  margin-bottom: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.select {
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ddd;
+  background-color: #fff;
+  font-size: 16px;
+}

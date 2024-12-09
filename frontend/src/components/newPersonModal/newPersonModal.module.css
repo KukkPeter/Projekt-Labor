@@ -1,0 +1,73 @@
+.form {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-group {
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 4px;
+    color: #333;
+}
+
+.input, .select, .textarea {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+}
+
+.textarea {
+    resize: vertical;
+}
+
+.fieldset {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.legend {
+    font-weight: bold;
+    padding: 0 5px;
+    color: #333;
+}
+
+.address-group {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+}
+
+.add-button, .remove-button, .submit-button {
+    padding: 8px;
+    border-radius: 5px;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+}
+
+.add-button {
+    margin-top: 10px;
+    background-color: #4caf50;
+}
+
+.remove-button {
+    margin-top: 8px;
+    background-color: #e57373;
+}
+
+.submit-button {
+    padding: 10px 20px;
+    background-color: #2196f3;
+    font-size: 16px;
+    width: 100%;
+}

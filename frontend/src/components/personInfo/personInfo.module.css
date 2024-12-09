@@ -1,0 +1,64 @@
+.personInfo {
+    margin: 10px;
+    border: 1px solid rgba(0,0,0,0.1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: stretch;
+    background: rgba(0,0,0,0.03);
+    box-shadow: rgba(99, 99, 99, 0.2) 0 2px 8px 0;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.personInfo::-webkit-scrollbar-thumb {
+    background-color: #adabad;
+    border-radius: 8px;
+}
+
+.personInfo::-webkit-scrollbar {
+    width: 10px;
+}
+
+.personInfo h3 {
+    margin-left: 20px;
+}
+
+.personInfo h3 span {
+    font-style: italic;
+    font-weight: normal;
+}
+
+.personInfo .menu button {
+    padding: 10px;
+    margin: 0;
+    height: 100%;
+    width: 50%;
+    border-radius: 0;
+}
+
+.personInfo .menu button.unselected {
+    box-shadow: none;
+}
+
+.personInfo .content {
+    overflow-y: auto;
+    margin-top: 5px;
+}
+
+.personInfo .content::-webkit-scrollbar-thumb {
+    background-color: #adabad;
+    border-radius: 8px;
+}
+
+.personInfo .content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.personInfo .content p {
+    margin: 0;
+    margin-left: 10px;
+    margin-top: 10px;
+}

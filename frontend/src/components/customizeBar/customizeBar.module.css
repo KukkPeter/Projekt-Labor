@@ -1,0 +1,121 @@
+.customizeBar {
+    width: 25%;
+    height: 100%;
+
+    position: absolute;
+    right: 0;
+    top: 0;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+
+    background: white;
+    z-index: 11;
+    box-shadow: 0 0 10px #00000073;
+
+    overflow-x: hidden;
+
+    transition: 0.2s;
+}
+
+.customizeBar .optionsMenu {
+    width: 100%;
+    display: flex;
+    align-content: center;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.customizeBar .optionsMenu .title {
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 0 10px -2px #00000073;
+    margin-bottom: 10px;
+}
+
+.customizeBar .optionsMenu .options {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    align-content: stretch;
+    justify-content: flex-start;
+    align-items: stretch;
+    height: 100%;
+}
+
+.customizeBar .optionsMenu .options .option {
+    width: calc(100% - 30px);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+    border: 1px solid #adabad;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 5px;
+    cursor: pointer;
+}
+
+.customizeBar .optionsMenu .options .option p {
+    margin: 0 0 0 10px;
+}
+
+.customizeBar hr {
+    width: 100%;
+}
+
+.customizeBar .actionsMenu {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+    width: 100%;
+}
+
+.customizeBar .actionsMenu button {
+    padding: 6px;
+    margin: 6px;
+    box-shadow: #0000003d 0 3px 8px;
+    background: rgba(0,0,0,0.05);
+    cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: .2s ease-in-out;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.customizeBar .actionsMenu button svg {
+    height: 16px;
+    width: 16px;
+}
+
+.customizeBar .actionsMenu button p {
+    margin: 10px;
+}
+
+.customizeBar .actionsMenu button:hover {
+    background: rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,.45);
+}
+
+.customizeBar .actionsMenu button:active {
+    background: rgba(0,0,0,0.12);
+    border: 1px solid rgba(0,0,0,.65);
+}

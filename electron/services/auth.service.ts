@@ -1,8 +1,6 @@
 import { BrowserWindow, ipcMain, IpcMainEvent } from 'electron';
 
-const Config = {
-    API: 'http://localhost:8000'
-}
+import * as Config from '../config.json';
 
 export function authService(
     browserWindow: BrowserWindow
